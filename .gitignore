@@ -1,0 +1,59 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# WhatsApp Session (akan dibuat ulang saat login di server)
+.wwebjs_auth/
+.wwebjs_cache/
+
+# Data files (akan dibuat otomatis saat bot berjalan)
+data/*.json
+data/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.settings/
+
+# Build files
+dist/
+build/
+*.tgz
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# PM2 (jika menggunakan PM2 di server)
+.pm2/
+pids/
+*.pid
+*.seed
+*.pid.lock
