@@ -1,5 +1,25 @@
 const { MessageMedia } = require('whatsapp-web.js');
-const sharp = require('sharp');
+
+// Try to load sharp, fallback to Jimp if not available (for Termux compatibility)
+let sharp = null;
+let Jimp = null;
+
+// Load image processing libraries
+(async () => {
+    try {
+        sharp = require('sharp');
+    } catch (error) {
+        console.log('⚠️ Sharp not available, using Jimp for image processing (Termux mode)');
+    }
+    
+    try {
+        Jimp = await import('jimp');
+        // Untuk Jimp v1.x
+        Jimp = Jimp.Jimp || Jimp.default || Jimp;
+    } catch (error) {
+        console.log('⚠️ Jimp import failed:', error.message);
+    }
+})();
 
 module.exports = async (client, message, args) => {
     try {
@@ -79,20 +99,46 @@ async function createImageSticker(client, message, media) {
         // Convert buffer dari base64
         const buffer = Buffer.from(media.data, 'base64');
         
-        // Resize dan optimize menggunakan sharp
-        const processedBuffer = await sharp(buffer)
-            .resize(512, 512, {
-                fit: 'contain',
-                background: { r: 0, g: 0, b: 0, alpha: 0 }
-            })
-            .webp()
-            .toBuffer();
+        let base64;
         
-        // Convert kembali ke base64
-        const base64 = processedBuffer.toString('base64');
+        // Gunakan sharp jika tersedia (Windows/Linux), fallback ke Jimp (Termux)
+        if (sharp) {
+            // Resize dan optimize menggunakan sharp
+            const processedBuffer = await sharp(buffer)
+                .resize(512, 512, {
+                    fit: 'contain',
+                    background: { r: 0, g: 0, b: 0, alpha: 0 }
+                })
+                .webp()
+                .toBuffer();
+            
+            base64 = processedBuffer.toString('base64');
+        } else {
+            // Fallback ke Jimp untuk Termux
+            const JimpModule = await import('jimp');
+            const JimpClass = JimpModule.Jimp || JimpModule.default || JimpModule;
+            
+            const image = await JimpClass.read(buffer);
+            
+            // Get original dimensions
+            const width = image.bitmap.width;
+            const height = image.bitmap.height;
+            
+            // Calculate scale to fit within 512x512
+            const scale = Math.min(512 / width, 512 / height);
+            const newWidth = Math.floor(width * scale);
+            const newHeight = Math.floor(height * scale);
+            
+            // Resize image
+            await image.resize({ w: newWidth, h: newHeight });
+            
+            const processedBuffer = await image.getBuffer('image/png');
+            base64 = processedBuffer.toString('base64');
+        }
         
         // Buat MessageMedia baru
-        const stickerMedia = new MessageMedia('image/webp', base64);
+        const mimeType = sharp ? 'image/webp' : 'image/png';
+        const stickerMedia = new MessageMedia(mimeType, base64);
         
         // Kirim sebagai sticker
         await client.sendMessage(message.from, stickerMedia, {
@@ -135,62 +181,50 @@ async function createTextSticker(client, message, text) {
     try {
         await message.reply('⏳ Sedang membuat text sticker...');
         
-        // Buat text dengan SVG (kompatibel dengan Termux)
-        const fontSize = text.length > 20 ? 40 : text.length > 10 ? 50 : 60;
-        const textColor = '#FFFFFF';
-        const strokeColor = '#000000';
-        const strokeWidth = 8;
+        // Import Jimp dynamically
+        const JimpModule = await import('jimp');
+        const JimpClass = JimpModule.Jimp || JimpModule.default || JimpModule;
         
-        // Split text jadi beberapa line jika terlalu panjang
-        const maxCharsPerLine = 15;
-        const words = text.split(' ');
-        const lines = [];
-        let currentLine = '';
-        
-        for (const word of words) {
-            if ((currentLine + ' ' + word).length <= maxCharsPerLine) {
-                currentLine += (currentLine ? ' ' : '') + word;
-            } else {
-                if (currentLine) lines.push(currentLine);
-                currentLine = word;
-            }
-        }
-        if (currentLine) lines.push(currentLine);
-        
-        // Limit max 5 lines
-        const displayLines = lines.slice(0, 5);
-        const lineHeight = fontSize + 20;
-        const totalHeight = displayLines.length * lineHeight;
-        const startY = (512 - totalHeight) / 2 + fontSize;
-        
-        // Buat SVG untuk text dengan outline
-        let svgText = '';
-        displayLines.forEach((line, index) => {
-            const y = startY + (index * lineHeight);
-            // Outline/stroke
-            svgText += `<text x="256" y="${y}" font-size="${fontSize}" font-weight="bold" font-family="Arial, sans-serif" text-anchor="middle" fill="none" stroke="${strokeColor}" stroke-width="${strokeWidth}">${escapeXml(line)}</text>`;
-            // Fill
-            svgText += `<text x="256" y="${y}" font-size="${fontSize}" font-weight="bold" font-family="Arial, sans-serif" text-anchor="middle" fill="${textColor}">${escapeXml(line)}</text>`;
+        // Buat blank image 512x512 dengan background hitam
+        const image = new JimpClass({
+            width: 512,
+            height: 512,
+            color: 0x000000FF // Black background
         });
         
-        const svg = `
-            <svg width="512" height="512" xmlns="http://www.w3.org/2000/svg">
-                ${svgText}
-            </svg>
-        `;
+        // Pilih font berdasarkan panjang text
+        let fontName;
+        if (text.length > 30) {
+            fontName = JimpClass.FONT_SANS_32_WHITE;
+        } else if (text.length > 15) {
+            fontName = JimpClass.FONT_SANS_64_WHITE;
+        } else {
+            fontName = JimpClass.FONT_SANS_64_WHITE;
+        }
         
-        // Convert SVG ke image menggunakan sharp
-        const buffer = Buffer.from(svg);
-        const processedBuffer = await sharp(buffer)
-            .resize(512, 512)
-            .webp()
-            .toBuffer();
+        // Load font - API yang benar untuk Jimp v1.x
+        const font = await JimpClass.loadFont(fontName);
         
-        // Convert ke base64
-        const base64 = processedBuffer.toString('base64');
+        // Hitung posisi untuk center text
+        const textWidth = JimpClass.measureText(font, text);
+        const textHeight = JimpClass.measureTextHeight(font, text, 480);
+        const x = Math.max(0, (512 - textWidth) / 2);
+        const y = Math.max(0, (512 - textHeight) / 2);
+        
+        // Print text
+        image.print({
+            font: font,
+            x: x,
+            y: y,
+            text: text
+        });
+        
+        // Convert ke buffer
+        const buffer = await image.getBuffer('image/png');
+        const base64 = buffer.toString('base64');
         
         // Buat MessageMedia
-        const stickerMedia = new MessageMedia('image/webp', base64);
+        const stickerMedia = new MessageMedia('image/png', base64);
         
         // Kirim sebagai sticker
         await client.sendMessage(message.from, stickerMedia, {
@@ -207,7 +241,7 @@ async function createTextSticker(client, message, text) {
     }
 }
 
-// Helper function untuk escape XML characters
+// Helper function untuk escape XML characters (tidak digunakan lagi)
 function escapeXml(text) {
     return text
         .replace(/&/g, '&amp;')
