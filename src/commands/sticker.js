@@ -1,6 +1,5 @@
 const { MessageMedia } = require('whatsapp-web.js');
 const sharp = require('sharp');
-const { createCanvas } = require('canvas');
 
 module.exports = async (client, message, args) => {
     try {
@@ -136,63 +135,54 @@ async function createTextSticker(client, message, text) {
     try {
         await message.reply('⏳ Sedang membuat text sticker...');
         
-        // Buat canvas
-        const canvas = createCanvas(512, 512);
-        const ctx = canvas.getContext('2d');
+        // Buat text dengan SVG (kompatibel dengan Termux)
+        const fontSize = text.length > 20 ? 40 : text.length > 10 ? 50 : 60;
+        const textColor = '#FFFFFF';
+        const strokeColor = '#000000';
+        const strokeWidth = 8;
         
-        // Background transparan
-        ctx.clearRect(0, 0, 512, 512);
-        
-        // Setup text style
-        ctx.fillStyle = '#FFFFFF';
-        ctx.strokeStyle = '#000000';
-        ctx.lineWidth = 8;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        
-        // Dynamic font size berdasarkan panjang text
-        let fontSize = 60;
-        if (text.length > 20) fontSize = 40;
-        if (text.length > 40) fontSize = 30;
-        if (text.length > 60) fontSize = 25;
-        
-        ctx.font = `bold ${fontSize}px Arial`;
-        
-        // Word wrap untuk text panjang
+        // Split text jadi beberapa line jika terlalu panjang
+        const maxCharsPerLine = 15;
         const words = text.split(' ');
         const lines = [];
-        let currentLine = words[0];
+        let currentLine = '';
         
-        for (let i = 1; i < words.length; i++) {
-            const testLine = currentLine + ' ' + words[i];
-            const metrics = ctx.measureText(testLine);
-            
-            if (metrics.width > 450) {
-                lines.push(currentLine);
-                currentLine = words[i];
+        for (const word of words) {
+            if ((currentLine + ' ' + word).length <= maxCharsPerLine) {
+                currentLine += (currentLine ? ' ' : '') + word;
             } else {
-                currentLine = testLine;
+                if (currentLine) lines.push(currentLine);
+                currentLine = word;
             }
         }
-        lines.push(currentLine);
+        if (currentLine) lines.push(currentLine);
         
-        // Draw text dengan outline
-        const lineHeight = fontSize + 10;
-        const startY = 256 - ((lines.length - 1) * lineHeight) / 2;
+        // Limit max 5 lines
+        const displayLines = lines.slice(0, 5);
+        const lineHeight = fontSize + 20;
+        const totalHeight = displayLines.length * lineHeight;
+        const startY = (512 - totalHeight) / 2 + fontSize;
         
-        lines.forEach((line, index) => {
+        // Buat SVG untuk text dengan outline
+        let svgText = '';
+        displayLines.forEach((line, index) => {
             const y = startY + (index * lineHeight);
-            // Stroke (outline hitam)
-            ctx.strokeText(line, 256, y);
-            // Fill (text putih)
-            ctx.fillText(line, 256, y);
+            // Outline/stroke
+            svgText += `<text x="256" y="${y}" font-size="${fontSize}" font-weight="bold" font-family="Arial, sans-serif" text-anchor="middle" fill="none" stroke="${strokeColor}" stroke-width="${strokeWidth}">${escapeXml(line)}</text>`;
+            // Fill
+            svgText += `<text x="256" y="${y}" font-size="${fontSize}" font-weight="bold" font-family="Arial, sans-serif" text-anchor="middle" fill="${textColor}">${escapeXml(line)}</text>`;
         });
         
-        // Convert canvas ke buffer
-        const buffer = canvas.toBuffer('image/png');
+        const svg = `
+            <svg width="512" height="512" xmlns="http://www.w3.org/2000/svg">
+                ${svgText}
+            </svg>
+        `;
         
-        // Process dengan sharp untuk optimize
+        // Convert SVG ke image menggunakan sharp
+        const buffer = Buffer.from(svg);
         const processedBuffer = await sharp(buffer)
+            .resize(512, 512)
             .webp()
             .toBuffer();
         
@@ -215,4 +205,14 @@ async function createTextSticker(client, message, text) {
         console.error('Error creating text sticker:', error);
         await message.reply('❌ Gagal membuat sticker dari text!');
     }
+}
+
+// Helper function untuk escape XML characters
+function escapeXml(text) {
+    return text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
 }
