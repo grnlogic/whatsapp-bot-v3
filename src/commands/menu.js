@@ -24,7 +24,10 @@ async function menuCommand(client, message) {
 ⏱️ *!uptime*
    Lihat waktu hidup bot & info sistem
 
-📋 *!menu*
+� *!info*
+   Informasi lengkap sistem & bot
+
+�📋 *!menu*
    Tampilkan menu ini
 
 ❓ *!help*

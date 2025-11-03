@@ -96,6 +96,7 @@ A: Bisa! Gunakan !todo edit [id] | [field] | [value]
 • !menu - Lihat menu utama
 • !ping - Cek status bot
 • !uptime - Info sistem bot
+• !info - Info lengkap sistem & CPU
 • !todo help - Panduan todo detail
 
 ━━━━━━━━━━━━━━━━━━━━

@@ -7,6 +7,7 @@ const helpCommand = require('../commands/help');
 const roastCommand = require('../commands/roast');
 const nekoCommand = require('../commands/neko');
 const hidetagCommand = require('../commands/hidetag');
+const infoCommand = require('../commands/info');
 
 /**
  * Handler untuk memproses command dari pesan
@@ -94,6 +95,13 @@ async function commandHandler(client, message) {
         case 'tagall':
         case 'tag':
             await hidetagCommand(client, message, args);
+            break;
+        
+        case 'info':
+        case 'sistem':
+        case 'sysinfo':
+        case 'system':
+            await infoCommand(client, message);
             break;
         
         // Tambahkan case untuk command lainnya di sini
