@@ -1,8 +1,19 @@
-# WhatsApp Bot
+# WhatsApp Bot v3 🤖
 
-Bot WhatsApp sederhana menggunakan whatsapp-web.js dengan login QR Code.
+Bot WhatsApp modern dengan fitur lengkap, support Windows, Linux, dan **Termux (Android)**!
 
-## 📁 Struktur Folder
+## 📱 Platform Support
+
+✅ **Windows** - Full support  
+✅ **Linux** - Full support  
+✅ **macOS** - Full support  
+✅ **Termux (Android)** - [📖 Lihat Panduan Lengkap Termux Setup](./TERMUX_SETUP.md)
+
+## � Instalasi
+
+### Windows / Linux / macOS
+
+1. Install dependencies:
 
 ```
 whatsapp-bot/

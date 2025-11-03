@@ -2,19 +2,46 @@ const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const commandHandler = require('./src/handlers/commandHandler');
 const { initReminderScheduler } = require('./src/schedulers/reminderScheduler');
+const os = require('os');
 
 // Simpan waktu bot mulai (untuk filter pesan lama)
 let botStartTime = null;
 let skippedMessagesCount = 0;
 let skippedMessagesTimer = null;
 
+// Detect platform
+const isTermux = os.platform() === 'android' || process.env.TERMUX_VERSION !== undefined;
+
+// Konfigurasi Puppeteer berdasarkan platform
+const puppeteerConfig = isTermux ? {
+    headless: true,
+    args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--no-first-run',
+        '--no-zygote',
+        '--single-process',
+        '--disable-gpu'
+    ],
+    // Gunakan Chrome/Chromium yang sudah terinstall di Termux
+    executablePath: process.env.CHROME_PATH || '/data/data/com.termux/files/usr/bin/chromium-browser'
+} : {
+    headless: true,
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
+};
+
+console.log('Platform:', os.platform());
+console.log('Is Termux:', isTermux);
+if (isTermux) {
+    console.log('Chrome Path:', puppeteerConfig.executablePath);
+}
+
 // Inisialisasi WhatsApp Client
 const client = new Client({
     authStrategy: new LocalAuth(),
-    puppeteer: {
-        headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
-    }
+    puppeteer: puppeteerConfig
 });
 
 // Event: QR Code untuk login
