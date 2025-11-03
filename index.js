@@ -3,6 +3,11 @@ const qrcode = require('qrcode-terminal');
 const commandHandler = require('./src/handlers/commandHandler');
 const { initReminderScheduler } = require('./src/schedulers/reminderScheduler');
 
+// Simpan waktu bot mulai (untuk filter pesan lama)
+let botStartTime = null;
+let skippedMessagesCount = 0;
+let skippedMessagesTimer = null;
+
 // Inisialisasi WhatsApp Client
 const client = new Client({
     authStrategy: new LocalAuth(),
@@ -22,6 +27,10 @@ client.on('qr', (qr) => {
 client.on('ready', () => {
     console.log('✅ Bot WhatsApp siap digunakan!');
     console.log('Bot aktif pada:', new Date().toLocaleString('id-ID'));
+    
+    // Set waktu bot ready (untuk filter pesan lama)
+    botStartTime = Date.now();
+    console.log('🕐 Bot start timestamp:', botStartTime);
     
     // Inisialisasi reminder scheduler
     initReminderScheduler(client);
@@ -52,6 +61,30 @@ client.on('message', async (message) => {
         
         // Abaikan pesan dari status/broadcast
         if (message.from === 'status@broadcast') {
+            return;
+        }
+        
+        // Filter pesan lama (hanya proses pesan yang dikirim setelah bot ready)
+        // Tambahkan buffer 5 detik untuk toleransi sinkronisasi
+        const messageTimestamp = message.timestamp * 1000; // Convert ke milliseconds
+        const bufferTime = 5000; // 5 detik buffer
+        
+        if (botStartTime && messageTimestamp < (botStartTime - bufferTime)) {
+            skippedMessagesCount++;
+            
+            // Clear timer sebelumnya jika ada
+            if (skippedMessagesTimer) {
+                clearTimeout(skippedMessagesTimer);
+            }
+            
+            // Set timer baru untuk menampilkan summary setelah 2 detik tidak ada pesan lama lagi
+            skippedMessagesTimer = setTimeout(() => {
+                if (skippedMessagesCount > 0) {
+                    console.log(`\n✅ Successfully skipped ${skippedMessagesCount} old message(s)\n`);
+                    skippedMessagesCount = 0;
+                }
+            }, 2000);
+            
             return;
         }
         
