@@ -82,6 +82,27 @@ A: Bisa! Gunakan !todo edit [id] | [field] | [value]
 
 ━━━━━━━━━━━━━━━━━━━━
 
+🎨 *STICKER MAKER:*
+
+*1. Image to Sticker:*
+   • Kirim gambar dengan caption !sticker
+   • Reply gambar dengan !sticker
+
+*2. Video to Sticker:*
+   • Kirim video (max 10 detik) dengan !sticker
+   • Reply video dengan !sticker
+   • Sticker akan menjadi animasi
+
+*3. Text to Sticker:*
+   • !sticker <text anda>
+   • Contoh: !sticker Halo Dunia!
+   • Text otomatis dibuat jadi sticker
+
+*Alias Command:*
+   !s, !stiker, !stik
+
+━━━━━━━━━━━━━━━━━━━━
+
 💡 *TIPS & TRIK:*
 
 ✅ Gunakan prioritas untuk mengatur task
@@ -98,6 +119,7 @@ A: Bisa! Gunakan !todo edit [id] | [field] | [value]
 • !uptime - Info sistem bot
 • !info - Info lengkap sistem & CPU
 • !todo help - Panduan todo detail
+• !sticker - Panduan sticker maker
 
 ━━━━━━━━━━━━━━━━━━━━
 

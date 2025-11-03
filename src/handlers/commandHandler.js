@@ -8,6 +8,7 @@ const roastCommand = require('../commands/roast');
 const nekoCommand = require('../commands/neko');
 const hidetagCommand = require('../commands/hidetag');
 const infoCommand = require('../commands/info');
+const stickerCommand = require('../commands/sticker');
 
 /**
  * Handler untuk memproses command dari pesan
@@ -102,6 +103,13 @@ async function commandHandler(client, message) {
         case 'sysinfo':
         case 'system':
             await infoCommand(client, message);
+            break;
+        
+        case 'sticker':
+        case 's':
+        case 'stiker':
+        case 'stik':
+            await stickerCommand(client, message, args);
             break;
         
         // Tambahkan case untuk command lainnya di sini

@@ -7,15 +7,21 @@
     "start": "node index.js",
     "dev": "nodemon index.js"
   },
-  "keywords": ["whatsapp", "bot", "qr"],
+  "keywords": [
+    "whatsapp",
+    "bot",
+    "qr"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "whatsapp-web.js": "^1.23.0",
-    "qrcode-terminal": "^0.12.0",
-    "node-cron": "^3.0.3",
+    "canvas": "^3.2.0",
     "nekos-best.js": "^6.1.0",
-    "node-fetch": "^2.7.0"
+    "node-cron": "^3.0.3",
+    "node-fetch": "^2.7.0",
+    "qrcode-terminal": "^0.12.0",
+    "sharp": "^0.34.4",
+    "whatsapp-web.js": "^1.23.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"

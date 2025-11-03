@@ -154,7 +154,39 @@ wink, cry, angry, sleep, dance, waifu
 ⚠️ Hanya bisa di grup
 
 ╔═══════════════════════
-║ 🎯 *PRIORITAS TASK*
+║ � *STICKER MAKER*
+╚═══════════════════════
+
+🖼️ *!sticker [gambar]*
+   Kirim gambar dengan caption !sticker
+   atau reply gambar dengan !sticker
+   
+🎬 *!sticker [video]*
+   Kirim video (max 10 detik) dengan !sticker
+   atau reply video dengan !sticker
+   
+✍️ *!sticker [text]*
+   Buat sticker dari text
+   Contoh: !sticker Halo Dunia!
+   
+🔤 *Alias:*
+   !s, !stiker, !stik
+   
+*Fitur:*
+• Image to sticker 🖼️
+• Video to animated sticker 🎬
+• Text to sticker ✍️
+• Auto resize & optimize
+• Support reply message
+• High quality output
+
+*Cara Pakai:*
+1. Kirim gambar + caption !sticker
+2. Reply gambar/video + !sticker
+3. !sticker <text anda>
+
+╔═══════════════════════
+║ �🎯 *PRIORITAS TASK*
 ╚═══════════════════════
 
 🟢 *low* - Prioritas rendah
