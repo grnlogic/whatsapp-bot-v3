@@ -9,6 +9,9 @@ const nekoCommand = require('../commands/neko');
 const hidetagCommand = require('../commands/hidetag');
 const infoCommand = require('../commands/info');
 const stickerCommand = require('../commands/sticker');
+const downloadCommand = require('../commands/download');
+const ytmp3Command = require('../commands/ytmp3');
+const afkCommand = require('../commands/afk');
 
 /**
  * Handler untuk memproses command dari pesan
@@ -110,6 +113,30 @@ async function commandHandler(client, message) {
         case 'stiker':
         case 'stik':
             await stickerCommand(client, message, args);
+            break;
+        
+        case 'download':
+        case 'dl':
+        case 'unduh':
+        case 'tiktok':
+        case 'tt':
+        case 'instagram':
+        case 'ig':
+        case 'youtube':
+        case 'yt':
+            await downloadCommand(client, message, args);
+            break;
+        
+        case 'ytmp3':
+        case 'mp3':
+        case 'ytaudio':
+        case 'youtubemp3':
+            await ytmp3Command(client, message, args);
+            break;
+        
+        case 'afk':
+        case 'away':
+            await afkCommand.execute(client._client || client, message, args);
             break;
         
         // Tambahkan case untuk command lainnya di sini

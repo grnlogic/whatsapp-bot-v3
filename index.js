@@ -2,6 +2,7 @@ const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const commandHandler = require('./src/handlers/commandHandler');
 const { initReminderScheduler } = require('./src/schedulers/reminderScheduler');
+const afkCommand = require('./src/commands/afk');
 const os = require('os');
 
 // Simpan waktu bot mulai (untuk filter pesan lama)
@@ -53,6 +54,7 @@ client.on('qr', (qr) => {
 // Event: Client siap
 client.on('ready', () => {
     console.log('✅ Bot WhatsApp siap digunakan!');
+    console.log('⚠️  BOT DALAM PENGEMBANGAN - Beberapa fitur mungkin belum stabil');
     console.log('Bot aktif pada:', new Date().toLocaleString('id-ID'));
     
     // Set waktu bot ready (untuk filter pesan lama)
@@ -115,6 +117,13 @@ client.on('message', async (message) => {
             return;
         }
         
+        // Cek AFK - handle mention/tag terlebih dahulu
+        await afkCommand.handleMention(client, message);
+        
+        // Cek apakah pengirim yang sedang AFK mengirim pesan
+        await afkCommand.handleUserMessage(client, message);
+        
+        // Process command seperti biasa
         await commandHandler(client, message);
     } catch (error) {
         console.error('Error handling message:', error);

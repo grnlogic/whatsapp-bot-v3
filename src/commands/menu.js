@@ -1,3 +1,6 @@
+const { MessageMedia } = require('whatsapp-web.js');
+const axios = require('axios');
+
 /**
  * Command Menu
  * Fungsi untuk menampilkan daftar semua command yang tersedia
@@ -6,224 +9,77 @@
  */
 async function menuCommand(client, message) {
     try {
+        // URL gambar tersembunyi - akan ditampilkan sebagai thumbnail menu
+        const imageUrl = 'https://i.pinimg.com/736x/62/71/21/627121c616927469a5afe87589f779bf.jpg';
+        
         const menuText = `
-┏━━━━━━━━━━━━━━━━━━━━┓
-┃  🤖 *WHATSAPP BOT*  ┃
-┃     *MENU UTAMA*     ┃
-┗━━━━━━━━━━━━━━━━━━━━┛
-
-👋 Halo! Saya adalah bot WhatsApp yang siap membantu Anda.
-
-╔═══════════════════════
-║ 📌 *BASIC COMMANDS*
-╚═══════════════════════
-
-🏓 *!ping*
-   Cek latency & status bot
-
-⏱️ *!uptime*
-   Lihat waktu hidup bot & info sistem
-
-� *!info*
-   Informasi lengkap sistem & bot
-
-�📋 *!menu*
-   Tampilkan menu ini
-
-❓ *!help*
-   Bantuan lengkap
-
-╔═══════════════════════
-║ ✅ *TODO & TASK MANAGER*
-╚═══════════════════════
-
-📝 *Menambah Task:*
-!todo add [judul] | [tanggal] | [prioritas] | [deskripsi]
-
-Contoh:
-!todo add Meeting | 2025-11-01 | high | Presentasi
-
-📋 *Melihat Task:*
-!todo list        - Semua task
-!todo pending     - Task belum selesai
-!todo overdue     - Task terlambat
-!todo detail [id] - Detail task
-
-✏️ *Mengelola Task:*
-!todo done [id]   - Tandai selesai
-!todo delete [id] - Hapus task
-!todo edit [id] | [field] | [value] - Edit task
-
-📚 *Info Todo:*
-!todo help - Panduan lengkap todo
-
-╔═══════════════════════
-║ 🔔 *REMINDER*
-╚═══════════════════════
-
-🔔 *!reminder*
-   Cek task mendatang (3 hari ke depan)
-
-⏰ *Auto Reminder:*
-   Bot akan otomatis mengirim reminder:
-   • Jam 08:00 - Reminder pagi
-   • Jam 12:00 - Reminder siang
-   • Jam 18:00 - Reminder sore
-
-╔═══════════════════════
-║ 🔥 *MAKI-MAKI (FUN)*
-╚═══════════════════════
-
-🤣 *!maki [nama]*
-   Maki-maki/ejek teman dengan lucu
-   Contoh: !maki Nabil
-   
-🏷️ *!maki @mention*
-   Tag orang dan bot akan tag balik!
-   Contoh: !maki @Nabil
-
-📊 *!maki stats*
-   Lihat statistik makian
-
-🔄 *!maki reset*
-   Reset history makian
-
-*Fitur:*
-• 70+ variasi makian lucu
-• Support mention/tag otomatis 🏷️
-• Anti-duplicate (tidak keluar berturut-turut)
-• Random system
-• Progress tracking
-
-╔═══════════════════════
-║ 🐱 *NEKO (ANIME)*
-╚═══════════════════════
-
-🐱 *!neko*
-   Kirim neko random
-   
-🎬 *!neko [kategori]*
-   Kirim gambar/GIF dari kategori
-   Contoh: !neko hug, !neko pat, !neko waifu
-   
-📋 *!neko list*
-   Lihat semua kategori (46 kategori!)
-   
-💡 *!neko help*
-   Bantuan lengkap
-
-*Fitur:*
-• 4 kategori gambar (PNG) 🖼️
-• 42 kategori GIF animasi 🎬
-• Kualitas tinggi & lucu
-• Info artist/anime name
-• Random selection
-
-*Kategori Populer:*
-hug, pat, kiss, cuddle, happy, smile, 
-wink, cry, angry, sleep, dance, waifu
-
-╔═══════════════════════
-║ 👥 *HIDETAG (ADMIN)*
-╚═══════════════════════
-
-📢 *!hidetag [pesan]*
-   Tag semua member (hidden)
-   Contoh: !hidetag Halo semua!
-   
-🔁 *Reply + !hidetag*
-   Bot kirim ulang pesan yang di-reply
-   + tag semua member (hidden)
-   
-🏷️ *!tagall [pesan]*
-   Alias untuk hidetag
-   
-*Fitur:*
-• Tag semua member grup 👥
-• Mention tersembunyi 🔇
-• Support reply message 🔁
-• Khusus admin grup 👑
-• Untuk pengumuman penting 📢
-
-*Cara Pakai:*
-1. !hidetag Pesan anda
-2. Reply pesan + !hidetag (kirim ulang)
-
-*Catatan:*
-⚠️ Hanya admin yang bisa pakai
-⚠️ Hanya bisa di grup
-
-╔═══════════════════════
-║ � *STICKER MAKER*
-╚═══════════════════════
-
-🖼️ *!sticker [gambar]*
-   Kirim gambar dengan caption !sticker
-   atau reply gambar dengan !sticker
-   
-🎬 *!sticker [video]*
-   Kirim video (max 10 detik) dengan !sticker
-   atau reply video dengan !sticker
-   
-✍️ *!sticker [text]*
-   Buat sticker dari text
-   Contoh: !sticker Halo Dunia!
-   
-🔤 *Alias:*
-   !s, !stiker, !stik
-   
-*Fitur:*
-• Image to sticker 🖼️
-• Video to animated sticker 🎬
-• Text to sticker ✍️
-• Auto resize & optimize
-• Support reply message
-• High quality output
-
-*Cara Pakai:*
-1. Kirim gambar + caption !sticker
-2. Reply gambar/video + !sticker
-3. !sticker <text anda>
-
-╔═══════════════════════
-║ �🎯 *PRIORITAS TASK*
-╚═══════════════════════
-
-🟢 *low* - Prioritas rendah
-🟡 *medium* - Prioritas sedang
-🟠 *high* - Prioritas tinggi
-🔴 *urgent* - Sangat mendesak
-
-╔═══════════════════════
-║ ℹ️ *INFO*
-╚═══════════════════════
-
-📅 Format Tanggal: YYYY-MM-DD
-   Contoh: 2025-11-01
-
-⚙️ Prefix: !
-   Semua command dimulai dengan tanda !
-
+🤖 *WHATSAPP BOT v1.0*
+━━━━━━━━━━━━━━━━━━━━
+⚠️ *Bot dalam tahap pengembangan*
+⚠️ *Beberapa fitur masih tidak bekerja sepenuhnya*
 ━━━━━━━━━━━━━━━━━━━━
 
-💡 *Tips:*
-• Gunakan !todo help untuk panduan detail
-• Bot akan reminder otomatis H-1 & H-0
-• Data tersimpan otomatis, tidak hilang
+*BASIC*
+\`!ping\` \`!uptime\` \`!info\` \`!help\`
 
-🔗 *Bantuan:*
-Ketik !help untuk bantuan lebih lanjut
+*UTILITY*
+\`!afk [alasan]\` - Set AFK
+\`!afk off\` - Nonaktifkan
+
+*TODO*
+\`!todo add [judul|tanggal|prioritas|desc]\`
+\`!todo list\` \`!todo done [id]\` \`!todo delete [id]\`
+\`!reminder\` - Cek reminder
+
+*FUN*
+\`!maki [nama]\` - Maki-maki
+\`!neko\` - Random neko
+\`!neko list\` - List kategori
+
+*ADMIN (GRUP)*
+\`!hidetag [pesan]\` - Tag all
+
+*STICKER*
+Kirim gambar/video + \`!sticker\`
+\`!sticker <text>\` - Text to sticker
+
+*DOWNLOAD*
+\`!download [url]\` - TikTok/IG/YT
+\`!ytmp3 [url]\` - YT to MP3
 
 ━━━━━━━━━━━━━━━━━━━━
-Bot WhatsApp v1.0 🤖
+💡 \`!help\` untuk detail lengkap
+🙏 Terima kasih atas pengertiannya
 `;
 
-        await message.reply(menuText);
-        
-        console.log(`✅ Menu berhasil ditampilkan untuk ${message.from}`);
+        // Try to send with image first
+        try {
+            console.log('📥 Downloading menu image...');
+            const response = await axios.get(imageUrl, {
+                responseType: 'arraybuffer',
+                timeout: 10000,
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                }
+            });
+            
+            const imageBuffer = Buffer.from(response.data, 'binary');
+            const base64Image = imageBuffer.toString('base64');
+            const media = new MessageMedia('image/jpeg', base64Image, 'menu.jpg');
+            
+            // Kirim gambar dengan caption (HANYA INI)
+            await message.reply(media, undefined, { caption: menuText });
+            console.log(`✅ Menu dengan gambar berhasil ditampilkan untuk ${message.from}`);
+        } catch (imageError) {
+            // Jika gagal download/kirim gambar, fallback ke text saja
+            console.warn('⚠️ Gagal kirim dengan gambar, fallback ke text:', imageError.message);
+            await message.reply(menuText);
+            console.log(`✅ Menu (text only) berhasil ditampilkan untuk ${message.from}`);
+        }
+            
     } catch (error) {
         console.error('Error executing menu command:', error);
-        await message.reply('❌ Terjadi kesalahan saat menampilkan menu.');
+        await message.reply('❌ Terjadi kesalahan saat menampilkan menu.\n\n💡 Coba lagi dengan !help');
     }
 }
 

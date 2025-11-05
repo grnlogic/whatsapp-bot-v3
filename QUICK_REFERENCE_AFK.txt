@@ -1,0 +1,79 @@
+╔═══════════════════════════════════════╗
+║     🌙 QUICK REFERENCE - AFK          ║
+╚═══════════════════════════════════════╝
+
+📝 COMMAND DASAR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+!afk [alasan]          → Set AFK dengan alasan
+!afk                   → Set AFK tanpa alasan
+!afk off              → Nonaktifkan AFK
+!away [alasan]        → Alias untuk !afk
+
+✨ FITUR OTOMATIS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📌 Saat di-tag di grup:
+   → Bot auto-reply dengan info AFK
+
+📌 Saat pesan di-reply:
+   → Bot auto-reply dengan info AFK
+
+📌 Saat user AFK mengirim pesan:
+   → Bot auto-nonaktifkan AFK
+   → Tampilkan welcome back message
+
+💡 CONTOH PENGGUNAAN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+!afk Sedang makan
+!afk Meeting penting sampai jam 3
+!afk Istirahat sebentar
+!afk off
+
+📊 INFORMASI YANG DITAMPILKAN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ Alasan AFK
+✅ Durasi sudah AFK (jam, menit, detik)
+✅ Waktu mulai AFK (DD/MM/YYYY HH:mm:ss)
+✅ Timezone: WIB (Asia/Jakarta)
+
+⚡ TIPS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+• Kirim pesan apa saja untuk auto-nonaktifkan AFK
+• Alasan AFK bersifat opsional
+• Data AFK hilang saat bot restart
+• Satu user hanya bisa punya 1 status AFK
+
+🎯 USE CASE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✓ Meeting/rapat
+✓ Makan/istirahat
+✓ Tidur
+✓ Keluar rumah
+✓ Sibuk mengerjakan sesuatu
+✓ Tidak bisa balas chat untuk sementara
+
+🔔 NOTIFIKASI
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Set AFK:
+  🌙 AFK Mode Diaktifkan
+  📝 Alasan: [alasan]
+  🕒 Waktu: [waktu]
+
+Di-tag:
+  💤 User sedang AFK
+  👤 User: @[nomor]
+  📝 Alasan: [alasan]
+  ⏱️ Sudah AFK selama: [durasi]
+  🕒 Sejak: [waktu]
+
+Welcome Back:
+  👋 Welcome Back!
+  @[nomor] sudah tidak AFK lagi!
+  ⏱️ Durasi AFK: [durasi]
+  🕒 Sejak: [waktu]
+  📝 Alasan sebelumnya: [alasan]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📚 Dokumentasi lengkap: README_AFK.md
+📋 Contoh lengkap: test_afk.js
+🔄 Update log: CHANGELOG_AFK.md
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

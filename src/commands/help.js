@@ -1,3 +1,6 @@
+const { MessageMedia } = require('whatsapp-web.js');
+const axios = require('axios');
+
 /**
  * Command Help
  * Fungsi untuk menampilkan bantuan lengkap
@@ -6,132 +9,158 @@
  */
 async function helpCommand(client, message) {
     try {
+        // URL gambar tersembunyi - sama dengan menu
+        const imageUrl = 'https://i.pinimg.com/736x/62/71/21/627121c616927469a5afe87589f779bf.jpg';
+        
         const helpText = `
-📖 *PANDUAN LENGKAP BOT*
+╔══════════════════════╗
+║  📖 *HELP & GUIDE*  ║
+╚══════════════════════╝
+
+⚠️ *BOT DALAM PENGEMBANGAN*
+Beberapa fitur mungkin mengalami bug atau belum berfungsi sempurna. Terima kasih atas pengertiannya! 🙏
+
+*🎯 CARA MENGGUNAKAN*
+• Semua command dimulai dengan \`!\`
+• Ketik \`!menu\` untuk lihat semua command
+• Ketik \`!ping\` untuk cek status bot
 
 ━━━━━━━━━━━━━━━━━━━━
 
-🎯 *CARA MENGGUNAKAN:*
+*📋 TODO TUTORIAL*
 
-1️⃣ Semua command dimulai dengan !
-2️⃣ Ketik !menu untuk melihat menu utama
-3️⃣ Gunakan !ping untuk cek status bot
+*1️⃣ Tambah Task:*
+\`!todo add Belajar | 2025-11-10 | high | Deskripsi\`
 
-━━━━━━━━━━━━━━━━━━━━
+*2️⃣ Lihat Task:*
+\`!todo list\` - Semua task
+\`!todo pending\` - Task belum selesai
+\`!todo overdue\` - Task terlambat
 
-📋 *TUTORIAL TODO LIST:*
+*3️⃣ Edit Task:*
+\`!todo edit [id] | [field] | [value]\`
 
-*Step 1: Tambah Task*
-!todo add Belajar Coding | 2025-11-01 | high | Belajar JavaScript
-
-*Step 2: Lihat Task*
-!todo list
-
-*Step 3: Tandai Selesai*
-!todo done 1
+*4️⃣ Selesaikan Task:*
+\`!todo done [id]\`
 
 ━━━━━━━━━━━━━━━━━━━━
 
-🔧 *FORMAT COMMAND:*
-
-*Todo Add:*
-!todo add [judul] | [tanggal] | [prioritas] | [deskripsi]
-
-• Judul: Wajib diisi
-• Tanggal: Format YYYY-MM-DD (wajib)
-• Prioritas: low/medium/high/urgent (opsional)
-• Deskripsi: Keterangan tambahan (opsional)
-
-*Todo Edit:*
-!todo edit [id] | [field] | [value]
-
-Field yang bisa diedit:
-• title - Ubah judul
-• deadline - Ubah tanggal (YYYY-MM-DD)
-• priority - Ubah prioritas
-• description - Ubah deskripsi
+*🔔 REMINDER*
+Bot otomatis kirim reminder:
+• H-1 & H-0 sebelum deadline
+• Jam 08:00, 12:00, 18:00
 
 ━━━━━━━━━━━━━━━━━━━━
 
-🔔 *REMINDER OTOMATIS:*
+*🎨 STICKER MAKER*
+1. Kirim gambar + \`!sticker\`
+2. Kirim video + \`!sticker\`
+3. \`!sticker <text>\` - Text to sticker
 
-Bot akan otomatis mengirim reminder:
-• H-1 (1 hari sebelum deadline)
-• H-0 (hari deadline)
-
-Waktu pengiriman:
-• 08:00 - Pagi
-• 12:00 - Siang
-• 18:00 - Sore
+*Alias:* \`!s\`, \`!stiker\`, \`!stik\`
 
 ━━━━━━━━━━━━━━━━━━━━
 
-❓ *FAQ (Pertanyaan Umum):*
+*📥 DOWNLOAD MEDIA*
 
-Q: Bagaimana cara menambah task?
-A: Gunakan !todo add [judul] | [tanggal] | [prioritas] | [deskripsi]
+*TikTok/Instagram/YouTube:*
+\`!download [url]\`
+\`!dl [url]\`
 
-Q: Apakah data akan hilang jika bot restart?
-A: Tidak, semua data tersimpan di file JSON
+*YouTube MP3:*
+\`!ytmp3 [url]\`
+\`!mp3 [url]\`
 
-Q: Bagaimana cara melihat task yang terlambat?
-A: Gunakan !todo overdue
-
-Q: Bisa edit task yang sudah dibuat?
-A: Bisa! Gunakan !todo edit [id] | [field] | [value]
-
-━━━━━━━━━━━━━━━━━━━━
-
-🎨 *STICKER MAKER:*
-
-*1. Image to Sticker:*
-   • Kirim gambar dengan caption !sticker
-   • Reply gambar dengan !sticker
-
-*2. Video to Sticker:*
-   • Kirim video (max 10 detik) dengan !sticker
-   • Reply video dengan !sticker
-   • Sticker akan menjadi animasi
-
-*3. Text to Sticker:*
-   • !sticker <text anda>
-   • Contoh: !sticker Halo Dunia!
-   • Text otomatis dibuat jadi sticker
-
-*Alias Command:*
-   !s, !stiker, !stik
+*Platform:* TikTok, Instagram, YouTube
+*Fitur:* No watermark, HD quality
 
 ━━━━━━━━━━━━━━━━━━━━
 
-💡 *TIPS & TRIK:*
+*🐱 NEKO (ANIME)*
+\`!neko\` - Random neko
+\`!neko [kategori]\` - Kategori tertentu
+\`!neko list\` - Lihat semua kategori
 
-✅ Gunakan prioritas untuk mengatur task
-✅ Set reminder H-1 akan membantu Anda
-✅ Check !todo pending untuk fokus kerja
-✅ Gunakan !reminder untuk cek cepat
-
-━━━━━━━━━━━━━━━━━━━━
-
-🆘 *BUTUH BANTUAN?*
-
-• !menu - Lihat menu utama
-• !ping - Cek status bot
-• !uptime - Info sistem bot
-• !info - Info lengkap sistem & CPU
-• !todo help - Panduan todo detail
-• !sticker - Panduan sticker maker
+*Populer:* hug, pat, kiss, waifu, smile
 
 ━━━━━━━━━━━━━━━━━━━━
 
-Semoga membantu! 🎉
+*🔥 MAKI-MAKI (FUN)*
+\`!maki [nama]\` - Maki teman
+\`!maki @mention\` - Maki dengan tag
+\`!maki stats\` - Statistik
+\`!maki reset\` - Reset history
+
+━━━━━━━━━━━━━━━━━━━━
+
+*👥 HIDETAG (ADMIN)*
+\`!hidetag [pesan]\` - Tag semua member
+\`!tagall [pesan]\` - Alias hidetag
+
+⚠️ Khusus admin grup
+⚠️ Mention tersembunyi
+
+━━━━━━━━━━━━━━━━━━━━
+
+*❓ FAQ*
+
+Q: Data hilang saat restart?
+A: Tidak, semua tersimpan di JSON
+
+Q: Cara edit task?
+A: \`!todo edit [id] | field | value\`
+
+Q: Lihat task terlambat?
+A: \`!todo overdue\`
+
+━━━━━━━━━━━━━━━━━━━━
+
+*💡 TIPS*
+✅ Pakai \`!todo help\` untuk detail todo
+✅ Auto reminder H-1 & H-0
+✅ Data tersimpan otomatis
+✅ \`!menu\` untuk lihat semua command
+
+━━━━━━━━━━━━━━━━━━━━
+
+*🆘 DAFTAR COMMAND*
+\`!menu\` \`!help\` \`!ping\` \`!uptime\` \`!info\`
+\`!todo\` \`!reminder\` \`!maki\` \`!neko\`
+\`!hidetag\` \`!sticker\` \`!download\` \`!ytmp3\`
+
+━━━━━━━━━━━━━━━━━━━━
+🤖 *WhatsApp Bot v1.0*
+⚠️ *Beta - Dalam Pengembangan*
 `;
 
-        await message.reply(helpText);
+        // Try to send with image first
+        try {
+            console.log('📥 Downloading help image...');
+            const response = await axios.get(imageUrl, {
+                responseType: 'arraybuffer',
+                timeout: 10000,
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                }
+            });
+            
+            const imageBuffer = Buffer.from(response.data, 'binary');
+            const base64Image = imageBuffer.toString('base64');
+            const media = new MessageMedia('image/jpeg', base64Image, 'help.jpg');
+            
+            // Kirim gambar dengan caption (HANYA INI)
+            await message.reply(media, undefined, { caption: helpText });
+            console.log(`✅ Help dengan gambar berhasil ditampilkan untuk ${message.from}`);
+        } catch (imageError) {
+            // Jika gagal download/kirim gambar, fallback ke text saja
+            console.warn('⚠️ Gagal kirim dengan gambar, fallback ke text:', imageError.message);
+            await message.reply(helpText);
+            console.log(`✅ Help (text only) berhasil ditampilkan untuk ${message.from}`);
+        }
         
-        console.log(`✅ Help berhasil ditampilkan untuk ${message.from}`);
     } catch (error) {
         console.error('Error executing help command:', error);
-        await message.reply('❌ Terjadi kesalahan saat menampilkan help.');
+        await message.reply('❌ Terjadi kesalahan saat menampilkan help.\n\n💡 Coba lagi dengan !menu');
     }
 }
 
