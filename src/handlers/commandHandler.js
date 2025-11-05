@@ -12,6 +12,12 @@ const stickerCommand = require('../commands/sticker');
 const downloadCommand = require('../commands/download');
 const ytmp3Command = require('../commands/ytmp3');
 const afkCommand = require('../commands/afk');
+const logoCommand = require('../commands/logo');
+const { playCommand, songCommand, ytsCommand } = require('../commands/youtube');
+const { altPlayCommand } = require('../commands/youtubeAlt');
+const { ultimateYouTubeDownload } = require('../services/ultimateYoutube');
+const { fileManagerCommand } = require('../commands/fileManager');
+const { geminiCommand, aiCommand } = require('../commands/gemini');
 
 /**
  * Handler untuk memproses command dari pesan
@@ -137,6 +143,55 @@ async function commandHandler(client, message) {
         case 'afk':
         case 'away':
             await afkCommand.execute(client._client || client, message, args);
+            break;
+        
+        case 'logo':
+        case 'logomaker':
+        case 'makelogo':
+            await logoCommand(client, message, args);
+            break;
+        
+        case 'play':
+        case 'musik':
+        case 'lagu':
+            await playCommand(client, message, args);
+            break;
+        
+        case 'song':
+        case 'ytdl':
+            await songCommand(client, message, args);
+            break;
+        
+        case 'yts':
+        case 'ytsearch':
+        case 'cariyt':
+            await ytsCommand(client, message, args);
+            break;
+        
+        case 'altplay':
+        case 'altyt':
+        case 'playfallback':
+            await altPlayCommand(client, message, args);
+            break;
+        
+        case 'filemgr':
+        case 'filemanager':
+        case 'fm':
+        case 'files':
+            await fileManagerCommand(client, message, args);
+            break;
+        
+        case 'nekobot':
+        case 'chat':
+        case 'ask':
+        case 'tanya':
+            await geminiCommand(client, message, args);
+            break;
+        
+        case 'ai':
+        case 'bot':
+        case 'assistant':
+            await aiCommand(client, message, args);
             break;
         
         // Tambahkan case untuk command lainnya di sini

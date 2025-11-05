@@ -47,6 +47,25 @@ Kirim gambar/video + \`!sticker\`
 \`!download [url]\` - TikTok/IG/YT
 \`!ytmp3 [url]\` - YT to MP3
 
+*YOUTUBE* 🎵
+\`!play [nama lagu]\` - Cari & download
+\`!song [url]\` - Download dari link
+\`!yts [kata kunci]\` - Search YouTube
+\`!altplay [url]\` - Alternative downloader
+
+*FILE MANAGER* 📁
+\`!filemgr status\` - Cek mode penyimpanan
+\`!filemgr keep\` - Simpan file download
+\`!filemgr nokeep\` - Hapus otomatis (default)
+\`!filemgr list\` - Lihat file tersimpan
+
+*AI CHATBOT* 🤖
+\`!nekobot [pesan]\` - Chat dengan AI
+\`!ai [pesan]\` - Alias untuk nekobot
+\`!nekobot mood\` - Lihat mood bot
+\`!nekobot reset\` - Reset percakapan
+\`!nekobot stats\` - Lihat statistik
+
 ━━━━━━━━━━━━━━━━━━━━
 💡 \`!help\` untuk detail lengkap
 🙏 Terima kasih atas pengertiannya

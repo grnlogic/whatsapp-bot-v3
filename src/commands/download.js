@@ -1,5 +1,6 @@
 const fetch = require('node-fetch');
 const { downloadTikTok, downloadInstagram, downloadYouTube } = require('../services/downloadService');
+const { downloadYouTubeEnhanced } = require('../services/youtubeEnhanced');
 
 /**
  * Command untuk download video dari TikTok, Instagram, dan YouTube
@@ -85,7 +86,18 @@ async function downloadCommand(client, message, args) {
                 result = await downloadInstagram(url);
                 break;
             case 'youtube':
-                result = await downloadYouTube(url);
+                // Use enhanced YouTube downloader with save-to-local strategy
+                console.log('🚀 Using enhanced YouTube downloader...');
+                const enhancedResult = await downloadYouTubeEnhanced(url, client, message);
+                
+                if (enhancedResult.success) {
+                    console.log(`✅ Enhanced YouTube download completed with method: ${enhancedResult.method}`);
+                    return; // Exit early since enhanced downloader handles everything
+                } else {
+                    // If enhanced fails, try regular method as fallback
+                    console.log('⚠️ Enhanced method failed, trying regular API...');
+                    result = await downloadYouTube(url);
+                }
                 break;
         }
 
@@ -118,73 +130,160 @@ async function downloadCommand(client, message, args) {
 
         await chat.sendMessage(caption);
 
-        // Download video ke buffer dengan timeout lebih panjang
+        // STRATEGY: Download to local file → Send to user → Delete from server
         console.log('📥 Downloading video from:', result.videoUrl.substring(0, 80) + '...');
         
-        const controller = new AbortController();
-        const timeout = setTimeout(() => {
-            controller.abort();
-        }, 120000); // 2 menit timeout untuk Termux
+        // Create temp directory if not exists
+        const fs = require('fs');
+        const path = require('path');
+        const { MessageMedia } = require('whatsapp-web.js');
+        
+        const tempDir = path.join(__dirname, '../../temp');
+        if (!fs.existsSync(tempDir)) {
+            fs.mkdirSync(tempDir, { recursive: true });
+        }
+        
+        // Generate unique filename
+        const timestamp = Date.now();
+        const videoId = result.videoUrl.split('/').pop().split('?')[0] || 'video';
+        const filename = `${platform}_${videoId}_${timestamp}.mp4`;
+        const filePath = path.join(tempDir, filename);
+        
+        console.log(`💾 Saving to: ${filePath}`);
         
         try {
-            const media = await fetch(result.videoUrl, {
-                signal: controller.signal,
+            // Step 1: Download to local file with streaming
+            const response = await fetch(result.videoUrl, {
                 headers: {
-                    'User-Agent': 'Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36'
+                    'User-Agent': 'Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Mobile Safari/537.36',
+                    'Accept': 'video/mp4,video/*,*/*;q=0.9',
+                    'Accept-Encoding': 'identity',
+                    'Range': 'bytes=0-' // Support partial downloads
+                },
+                timeout: 180000 // 3 minutes timeout
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
+            }
+            
+            // Stream response to file
+            const fileStream = fs.createWriteStream(filePath);
+            let downloadedBytes = 0;
+            let lastProgress = 0;
+            
+            response.body.on('data', (chunk) => {
+                downloadedBytes += chunk.length;
+                const progressMB = (downloadedBytes / 1024 / 1024).toFixed(1);
+                
+                // Log progress every 5MB
+                if (downloadedBytes - lastProgress > 5 * 1024 * 1024) {
+                    console.log(`📥 Downloaded: ${progressMB} MB`);
+                    lastProgress = downloadedBytes;
                 }
             });
             
-            clearTimeout(timeout);
+            // Pipe to file
+            response.body.pipe(fileStream);
             
-            if (!media.ok) {
-                throw new Error(`HTTP error! status: ${media.status}`);
-            }
+            // Wait for download to complete
+            await new Promise((resolve, reject) => {
+                fileStream.on('finish', resolve);
+                fileStream.on('error', reject);
+                response.body.on('error', reject);
+            });
             
-            const buffer = await media.buffer();
-            const sizeMB = (buffer.length / 1024 / 1024).toFixed(2);
+            // Step 2: Check file size and validate
+            const stats = fs.statSync(filePath);
+            const fileSizeMB = (stats.size / 1024 / 1024).toFixed(2);
             
-            console.log('✅ Video downloaded, size:', sizeMB, 'MB');
+            console.log(`✅ File saved locally: ${fileSizeMB} MB`);
             
-            // Cek ukuran file (WhatsApp limit ~64MB)
-            if (buffer.length > 64 * 1024 * 1024) {
+            // Check WhatsApp limits
+            if (stats.size > 64 * 1024 * 1024) {
+                // Delete oversized file
+                fs.unlinkSync(filePath);
                 await chat.sendMessage(
                     `⚠️ *Video terlalu besar!*\n\n` +
-                    `📊 Ukuran: ${sizeMB} MB\n` +
+                    `📊 Ukuran: ${fileSizeMB} MB\n` +
                     `⚠️ WhatsApp limit: 64 MB\n\n` +
                     `💡 Coba video yang lebih pendek`
                 );
                 return;
             }
             
-            // Kirim video sebagai file
-            await chat.sendMessage(buffer, {
-                mimetype: 'video/mp4',
-                filename: result.filename || `${platform}_video_${Date.now()}.mp4`,
-                caption: `${platformEmoji[platform]} Video dari ${platform.toUpperCase()}\n📊 Ukuran: ${sizeMB} MB`
-            });
-
-            console.log(`✅ Video ${platform} berhasil dikirim ke WhatsApp`);
-            console.log(`📊 Total waktu: ${((Date.now() - startTime) / 1000).toFixed(2)}s\n`);
-
-        } catch (fetchError) {
-            clearTimeout(timeout);
+            // Step 3: Read file and create media
+            console.log('📤 Sending to WhatsApp...');
+            const fileBuffer = fs.readFileSync(filePath);
+            const media = new MessageMedia(
+                'video/mp4',
+                fileBuffer.toString('base64'),
+                filename
+            );
             
-            if (fetchError.name === 'AbortError') {
-                console.error('❌ Download timeout');
-                await chat.sendMessage(
-                    `⏱️ *Download Timeout!*\n\n` +
-                    `Video terlalu lama untuk diunduh.\n` +
-                    `Kemungkinan file terlalu besar atau koneksi lambat.\n\n` +
-                    `💡 Coba video yang lebih pendek.`
-                );
-            } else {
-                console.error('❌ Fetch error:', fetchError.message);
-                await chat.sendMessage(
-                    `❌ *Gagal mengunduh file video!*\n\n` +
-                    `Error: ${fetchError.message}\n\n` +
-                    `💡 Coba lagi dalam beberapa saat.`
-                );
+            // Step 4: Send to user
+            await chat.sendMessage(media, {
+                caption: `${platformEmoji[platform]} *Video dari ${platform.toUpperCase()}*\n\n` +
+                        `📊 Ukuran: ${fileSizeMB} MB\n` +
+                        `⏱️ Durasi: ${result.duration || 'N/A'}s\n` +
+                        `✅ Download berhasil!`
+            });
+            
+            console.log(`✅ Video berhasil dikirim ke WhatsApp`);
+            
+            // Step 5: Delete from server after successful send
+            setTimeout(() => {
+                try {
+                    if (fs.existsSync(filePath)) {
+                        fs.unlinkSync(filePath);
+                        console.log(`�️ File deleted: ${filename}`);
+                    }
+                } catch (deleteError) {
+                    console.warn('⚠️ Could not delete temp file:', deleteError.message);
+                }
+            }, 5000); // Delete after 5 seconds
+            
+            console.log(`�📊 Total processing time: ${((Date.now() - startTime) / 1000).toFixed(2)}s\n`);
+
+        } catch (downloadError) {
+            console.error('❌ Download/Send error:', downloadError);
+            
+            // Cleanup on error
+            if (fs.existsSync(filePath)) {
+                try {
+                    fs.unlinkSync(filePath);
+                    console.log('🗑️ Cleaned up failed download file');
+                } catch (cleanupError) {
+                    console.warn('⚠️ Could not cleanup file:', cleanupError.message);
+                }
             }
+            
+            let errorMessage = '❌ *Download gagal!*\n\n';
+            
+            if (downloadError.message.includes('403')) {
+                errorMessage += '🚫 **Error 403:** Server menolak akses\n\n' +
+                              '💡 **Solusi:**\n' +
+                              '• Video mungkin private/restricted\n' +
+                              '• Coba video lain\n' +
+                              '• Gunakan URL yang berbeda';
+            } else if (downloadError.message.includes('timeout')) {
+                errorMessage += '⏱️ **Timeout:** Download terlalu lama\n\n' +
+                              '💡 **Solusi:**\n' +
+                              '• Video terlalu besar\n' +
+                              '• Koneksi internet lambat\n' +
+                              '• Coba video yang lebih pendek';
+            } else if (downloadError.message.includes('404')) {
+                errorMessage += '🔍 **Error 404:** Video tidak ditemukan\n\n' +
+                              '💡 **Solusi:**\n' +
+                              '• Video mungkin sudah dihapus\n' +
+                              '• URL tidak valid\n' +
+                              '• Cek kembali link yang dikirim';
+            } else {
+                errorMessage += `⚠️ **Error:** ${downloadError.message}\n\n` +
+                              '💡 **Coba lagi dalam beberapa saat**';
+            }
+            
+            await chat.sendMessage(errorMessage);
         }
 
     } catch (error) {
