@@ -20,7 +20,7 @@ async function menuCommand(client, message) {
 ━━━━━━━━━━━━━━━━━━━━
 
 *BASIC*
-\`!ping\` \`!uptime\` \`!info\` \`!help\`
+\`!ping\` \`!uptime\` \`!info\` \`!help\` \`!myid\` \`!developer\`
 
 *UTILITY*
 \`!afk [alasan]\` - Set AFK
@@ -35,6 +35,10 @@ async function menuCommand(client, message) {
 \`!maki [nama]\` - Maki-maki
 \`!neko\` - Random neko
 \`!neko list\` - List kategori
+\`!quote\` - 💬 Random quote inspiratif
+\`!quotesimage\` - 🎨 Quote dalam bentuk image
+\`!faktaunik\` - 💡 Random fakta unik
+\`!bucin\` - 💕 Kata-kata bucin/romantis
 
 *ADMIN (GRUP)*
 \`!hidetag [pesan]\` - Tag all
@@ -65,6 +69,65 @@ Kirim gambar/video + \`!sticker\`
 \`!nekobot mood\` - Lihat mood bot
 \`!nekobot reset\` - Reset percakapan
 \`!nekobot stats\` - Lihat statistik
+
+*LOLHUMAN API* ✨
+\`!qrcode [text]\` - Generate QR Code
+\`!pinterest [query]\` - Cari gambar Pinterest
+\`!pixiv [tag]\` - 🎨 Cari gambar Pixiv (⚠️ bisa NSFW)
+\`!wallpaper [keyword]\` - 🖼️ Search wallpaper HD
+\`!texteffect [style] [text]\` - 🎨 Text to image effect
+\`!stalkig [username]\` - Stalk profil Instagram
+\`!quote\` - Random quote inspiratif
+\`!chord [judul]\` - Cari chord gitar
+\`!character [nama]\` - Cari anime character
+\`!wait [url_gambar]\` - Cari anime dari gambar
+\`!asmaulhusna [nomor]\` - 99 Nama Allah
+
+*NSFW CONTENT* 🔞
+⚠️ *PERINGATAN: Konten Dewasa 18+*
+⚠️ *Wajib verifikasi oleh developer*
+
+📝 *Cara Akses NSFW:*
+1. Daftar: \`!daftar [nama lengkap]\`
+2. Tunggu approval dari developer
+3. Setelah diapprove, akses semua fitur NSFW
+
+🔞 *NSFW Commands:*
+\`!nhsearch [keyword]\` - 🔎 Search nhentai doujin
+\`!nhentai [kode]\` - 💣 Info detail kode nuklir
+\`!danbooru [tag]\` - 🎨 Random anime image
+\`!nekopoi [url]\` - 🎬 Nekopoi downloader
+
+👤 *NSFW User Management:*
+\`!daftar [nama]\` - Registrasi akses NSFW
+\`!myid\` - Cek WhatsApp ID Anda
+
+🔧 *Developer Only:*
+\`!verify approve @user\` - Approve user
+\`!verify reject @user [reason]\` - Reject user
+\`!verify pending\` - Lihat pending list
+\`!verify remove @user\` - Hapus dari approved
+\`!nsfwlist stats\` - Statistik users
+\`!nsfwlist approved\` - List approved users
+\`!nsfwlist pending\` - List pending users
+\`!nsfwlist rejected\` - List rejected users
+
+⚠️ *Disclaimer:*
+Bot tidak bertanggung jawab atas penyalahgunaan fitur NSFW.
+Pengguna wajib berusia 18+ dan bertanggung jawab penuh.
+
+━━━━━━━━━━━━━━━━━━━━
+
+*BAN MANAGEMENT* 🚫
+👨‍💼 *Developer Only - User Control*
+
+\`!ban @user [reason]\` - Ban user dari bot
+\`!ban <user_id> [reason]\` - Ban dengan ID
+\`!unban @user\` - Unban user
+\`!unban <user_id>\` - Unban dengan ID
+\`!banlist\` - Lihat semua banned users
+
+⚠️ User yang di-ban tidak bisa akses *SEMUA* fitur bot!
 
 ━━━━━━━━━━━━━━━━━━━━
 💡 \`!help\` untuk detail lengkap

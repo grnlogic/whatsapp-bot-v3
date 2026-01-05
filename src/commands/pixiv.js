@@ -1,11 +1,13 @@
 const axios = require('axios');
-const cheerio = require('cheerio');
+const fs = require('fs').promises;
+const path = require('path');
 const { MessageMedia } = require('whatsapp-web.js');
 
 /**
  * Command untuk mencari gambar dari Pixiv berdasarkan tag/karakter
  * Usage: !pixiv <nama karakter/tag>
  * Example: !pixiv miku, !pixiv anime girl
+ * Note: Konten bisa NSFW, jadi tidak perlu NSFW check terpisah tapi user harus aware
  * 
  * @param {Object} client - WhatsApp client
  * @param {Object} message - Pesan yang diterima
@@ -21,173 +23,134 @@ async function pixivCommand(client, message, args) {
                 '!pixiv <nama karakter/tag>\n\n' +
                 '💡 *Contoh:*\n' +
                 '• !pixiv miku\n' +
-                '• !pixiv anime girl\n' +
-                '• !pixiv genshin impact'
+                '• !pixiv genshin impact\n' +
+                '• !pixiv loli kawaii\n\n' +
+                '⚠️ *Note:* Hasil bisa mengandung konten NSFW'
             );
             return;
         }
 
         const searchQuery = args.join(' ');
+        const tempDir = path.join(__dirname, '../../temp');
+        let tempFilePath = null;
         
         // Kirim pesan loading
-        const loadingMsg = await message.reply(`🔍 Mencari gambar *${searchQuery}* di Pixiv...\n⏳ Mohon tunggu sebentar...`);
+        await message.reply(`🔍 Mencari gambar *${searchQuery}* di Pixiv...\n⏳ Mohon tunggu sebentar...`);
 
         try {
-            // Cara 1: Menggunakan API Pixiv (memerlukan proxy atau VPN jika diblokir)
-            // Encode query untuk URL
-            const encodedQuery = encodeURIComponent(searchQuery);
-            
-            // Setup headers untuk menghindari blocking
-            const headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-                'Accept-Language': 'en-US,en;q=0.5',
-                'Referer': 'https://www.pixiv.net/',
-            };
+            // Pastikan temp directory exists
+            try {
+                await fs.access(tempDir);
+            } catch {
+                await fs.mkdir(tempDir, { recursive: true });
+            }
 
-            // Cara alternatif: Gunakan API publik atau scraping ringan
-            // Karena Pixiv memerlukan autentikasi, kita akan gunakan pendekatan alternatif
-            
-            // Option 1: Gunakan API Danbooru (lebih mudah diakses)
-            const danbooruUrl = `https://danbooru.donmai.us/posts.json?tags=${encodedQuery}&limit=1`;
-            const danbooruResponse = await axios.get(danbooruUrl, { 
-                timeout: 15000,
-                headers: headers 
+            // Call LoLHuman Pixiv API
+            const response = await axios.get('https://api.lolhuman.xyz/api/pixiv', {
+                params: {
+                    apikey: process.env.LOLHUMAN_API_KEY || '10dbd7bdb109b10b4f67ad1f',
+                    query: searchQuery
+                },
+                timeout: 60000
             });
 
-            if (danbooruResponse.data && danbooruResponse.data.length > 0) {
-                const post = danbooruResponse.data[0];
-                let imageUrl = post.file_url || post.large_file_url || post.preview_file_url;
-                
-                // Jika URL relatif, tambahkan domain
-                if (imageUrl && !imageUrl.startsWith('http')) {
-                    imageUrl = 'https://danbooru.donmai.us' + imageUrl;
-                }
-
-                if (imageUrl) {
-                    // Download gambar
-                    const imageResponse = await axios.get(imageUrl, {
-                        responseType: 'arraybuffer',
-                        timeout: 30000,
-                        headers: headers
-                    });
-
-                    // Konversi ke base64
-                    const base64Image = Buffer.from(imageResponse.data).toString('base64');
-                    const mimeType = imageResponse.headers['content-type'] || 'image/jpeg';
-                    
-                    // Buat media message
-                    const media = new MessageMedia(mimeType, base64Image);
-                    
-                    // Kirim gambar dengan caption
-                    await message.reply(media, null, {
-                        caption: `🎨 *Hasil pencarian: ${searchQuery}*\n\n` +
-                                `📊 *Info:*\n` +
-                                `• Rating: ${post.rating || 'N/A'}\n` +
-                                `• Score: ${post.score || 'N/A'}\n` +
-                                `• Artist: ${post.tag_string_artist || 'Unknown'}\n\n` +
-                                `🔗 Source: Danbooru\n` +
-                                `💡 Tip: Gunakan tag bahasa Inggris untuk hasil lebih baik`
-                    });
-
-                    // Hapus pesan loading
-                    try {
-                        await loadingMsg.delete();
-                    } catch (e) {
-                        // Ignore jika gagal hapus
-                    }
-                    
-                    console.log(`✅ Pixiv command berhasil untuk query: ${searchQuery}`);
-                    return;
-                }
+            if (response.data.status !== 200) {
+                return message.reply(`❌ Gagal mencari gambar: ${response.data.message}`);
             }
 
-            // Jika tidak ada hasil dari Danbooru, coba API lain
-            // Option 2: Gelbooru API
-            const gelbooruUrl = `https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1&tags=${encodedQuery}&limit=1`;
-            const gelbooruResponse = await axios.get(gelbooruUrl, {
-                timeout: 15000,
-                headers: headers
+            const results = response.data.result;
+
+            if (!results || results.length === 0) {
+                return message.reply(`❌ Tidak ada gambar ditemukan untuk: "${searchQuery}"\n\n💡 Coba kata kunci lain`);
+            }
+
+            // Pilih random image dari hasil (untuk variasi)
+            const randomIndex = Math.floor(Math.random() * Math.min(results.length, 10)); // Random dari 10 pertama
+            const selectedImage = results[randomIndex];
+
+            console.log(`📥 Downloading Pixiv image: ${selectedImage.title} (ID: ${selectedImage.id})`);
+
+            // Download image to temp folder
+            const imageResponse = await axios.get(selectedImage.image, {
+                responseType: 'arraybuffer',
+                timeout: 60000,
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                    'Referer': 'https://www.pixiv.net/'
+                }
             });
 
-            if (gelbooruResponse.data && gelbooruResponse.data.post && gelbooruResponse.data.post.length > 0) {
-                const post = gelbooruResponse.data.post[0];
-                const imageUrl = post.file_url;
+            // Generate unique filename
+            const timestamp = Date.now();
+            const extension = '.jpg'; // Pixiv images usually jpg
+            const safeQuery = searchQuery.replace(/[^a-z0-9]/gi, '_').substring(0, 20);
+            const filename = `pixiv_${safeQuery}_${timestamp}${extension}`;
+            tempFilePath = path.join(tempDir, filename);
 
-                if (imageUrl) {
-                    // Download gambar
-                    const imageResponse = await axios.get(imageUrl, {
-                        responseType: 'arraybuffer',
-                        timeout: 30000,
-                        headers: headers
-                    });
+            // Save to temp folder
+            await fs.writeFile(tempFilePath, Buffer.from(imageResponse.data));
+            console.log(`💾 Image saved to: ${tempFilePath}`);
 
-                    // Konversi ke base64
-                    const base64Image = Buffer.from(imageResponse.data).toString('base64');
-                    const mimeType = imageResponse.headers['content-type'] || 'image/jpeg';
-                    
-                    // Buat media message
-                    const media = new MessageMedia(mimeType, base64Image);
-                    
-                    // Kirim gambar dengan caption
-                    await message.reply(media, null, {
-                        caption: `🎨 *Hasil pencarian: ${searchQuery}*\n\n` +
-                                `📊 *Info:*\n` +
-                                `• Rating: ${post.rating || 'N/A'}\n` +
-                                `• Score: ${post.score || 'N/A'}\n` +
-                                `• Dimensions: ${post.width}x${post.height}\n\n` +
-                                `🔗 Source: Gelbooru\n` +
-                                `💡 Tip: Gunakan tag bahasa Inggris untuk hasil lebih baik`
-                    });
+            // Get file size for info
+            const stats = await fs.stat(tempFilePath);
+            const fileSizeKB = (stats.size / 1024).toFixed(2);
 
-                    // Hapus pesan loading
-                    try {
-                        await loadingMsg.delete();
-                    } catch (e) {
-                        // Ignore jika gagal hapus
-                    }
-                    
-                    console.log(`✅ Pixiv command berhasil untuk query: ${searchQuery}`);
-                    return;
+            // Read file and create MessageMedia
+            const imageBuffer = await fs.readFile(tempFilePath);
+            const base64Image = imageBuffer.toString('base64');
+            const media = new MessageMedia('image/jpeg', base64Image, filename);
+
+            // Send image with caption
+            const caption = 
+                `🎨 *Pixiv Image*\n\n` +
+                `📝 Title: ${selectedImage.title}\n` +
+                `🆔 ID: ${selectedImage.id}\n` +
+                `🔍 Query: ${searchQuery}\n` +
+                `📏 Size: ${fileSizeKB} KB\n` +
+                `📊 Found: ${results.length} results\n\n` +
+                `🔗 Source: Pixiv\n` +
+                `⚠️ *Note:* Hasil bisa mengandung konten NSFW`;
+
+            await message.reply(media, null, { caption });
+            console.log(`✅ Pixiv image sent successfully`);
+
+            // Delete temp file after sending
+            await fs.unlink(tempFilePath);
+            console.log(`🗑️ Temp file deleted: ${tempFilePath}`);
+
+        } catch (error) {
+            console.error('Error in pixiv command:', error);
+
+            // Clean up temp file if exists
+            if (tempFilePath) {
+                try {
+                    await fs.unlink(tempFilePath);
+                    console.log(`🗑️ Temp file cleaned up after error: ${tempFilePath}`);
+                } catch (cleanupError) {
+                    console.error('Failed to cleanup temp file:', cleanupError);
                 }
             }
 
-            // Jika semua gagal
-            await loadingMsg.edit(
-                `❌ *Tidak ditemukan gambar untuk: ${searchQuery}*\n\n` +
-                `💡 *Tips:*\n` +
-                `• Gunakan tag dalam bahasa Inggris\n` +
-                `• Coba kata kunci yang lebih spesifik\n` +
-                `• Contoh: "hatsune_miku", "anime_girl", "genshin_impact"\n\n` +
-                `🔄 Coba lagi dengan kata kunci berbeda!`
-            );
-
-        } catch (fetchError) {
-            console.error('Error fetching image:', fetchError.message);
-            
-            let errorMessage = '❌ *Gagal mengambil gambar*\n\n';
-            
-            if (fetchError.code === 'ECONNABORTED' || fetchError.message.includes('timeout')) {
-                errorMessage += '⏱️ *Timeout:* Koneksi terlalu lama\n💡 Coba lagi dalam beberapa saat';
-            } else if (fetchError.response && fetchError.response.status === 429) {
-                errorMessage += '🚫 *Rate limit:* Terlalu banyak request\n💡 Tunggu beberapa menit sebelum mencoba lagi';
-            } else if (fetchError.code === 'ENOTFOUND' || fetchError.code === 'ECONNREFUSED') {
-                errorMessage += '🌐 *Koneksi gagal:* Tidak dapat mengakses API\n💡 Periksa koneksi internet Anda';
-            } else {
-                errorMessage += `⚠️ Error: ${fetchError.message}\n💡 Coba lagi nanti`;
+            if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT') {
+                return message.reply('❌ Request timeout. Gambar terlalu besar atau koneksi lambat, coba lagi.');
             }
-            
-            await loadingMsg.edit(errorMessage);
+
+            if (error.response) {
+                return message.reply(`❌ API Error: ${error.response.status}\n${error.response.data?.message || 'Unknown error'}`);
+            }
+
+            message.reply('❌ Terjadi kesalahan saat mengambil gambar. Coba lagi nanti.');
         }
 
     } catch (error) {
         console.error('Error in pixiv command:', error);
         await message.reply(
             '❌ *Terjadi kesalahan!*\n\n' +
-            `⚠️ Error: ${error.message}\n\n` +
-            '💡 Silakan coba lagi nanti.'
+            `📝 Detail: ${error.message}\n\n` +
+            '💡 Coba lagi dalam beberapa saat'
         );
     }
 }
 
 module.exports = pixivCommand;
+

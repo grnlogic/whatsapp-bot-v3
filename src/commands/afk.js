@@ -87,12 +87,13 @@ module.exports = {
                 return;
             }
             
-            // Cek mention dari pesan
-            const mentionedIds = await message.getMentions();
+            // Cek mention dari pesan - gunakan mentionedIds langsung (array of string IDs)
+            const mentionedIds = message.mentionedIds || [];
             
             if (mentionedIds && mentionedIds.length > 0) {
-                for (const contact of mentionedIds) {
-                    const mentionedNumber = contact.id.user;
+                for (const mentionedId of mentionedIds) {
+                    // Extract user number dari ID (format: 628xxx@c.us atau 41xxx@lid)
+                    const mentionedNumber = mentionedId.split('@')[0];
                     
                     if (afkDatabase.has(mentionedNumber)) {
                         const afkData = afkDatabase.get(mentionedNumber);
@@ -106,7 +107,7 @@ module.exports = {
                             `⏱️ Sudah AFK selama: ${formattedDuration}\n` +
                             `🕒 Sejak: ${afkData.timeString}`,
                             {
-                                mentions: [contact]
+                                mentions: [mentionedId]
                             }
                         );
                     }
