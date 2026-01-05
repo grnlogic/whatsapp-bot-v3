@@ -12,30 +12,53 @@ let skippedMessagesTimer = null;
 
 // Detect platform
 const isTermux = os.platform() === 'android' || process.env.TERMUX_VERSION !== undefined;
+const isLinuxServer = os.platform() === 'linux' && !isTermux;
 
 // Konfigurasi Puppeteer berdasarkan platform
-const puppeteerConfig = isTermux ? {
-    headless: true,
-    args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--no-first-run',
-        '--no-zygote',
-        '--single-process',
-        '--disable-gpu'
-    ],
-    // Gunakan Chrome/Chromium yang sudah terinstall di Termux
-    executablePath: process.env.CHROME_PATH || '/data/data/com.termux/files/usr/bin/chromium-browser'
-} : {
-    headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
-};
+let puppeteerConfig;
+
+if (isTermux) {
+    // Termux (Android)
+    puppeteerConfig = {
+        headless: true,
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-accelerated-2d-canvas',
+            '--no-first-run',
+            '--no-zygote',
+            '--single-process',
+            '--disable-gpu'
+        ],
+        executablePath: process.env.CHROME_PATH || '/data/data/com.termux/files/usr/bin/chromium-browser'
+    };
+} else if (isLinuxServer) {
+    // Linux Server (VPS/Dedicated)
+    puppeteerConfig = {
+        headless: true,
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-gpu',
+            '--disable-software-rasterizer',
+            '--disable-extensions'
+        ],
+        executablePath: process.env.CHROME_PATH || '/usr/bin/chromium-browser'
+    };
+} else {
+    // Windows/Mac (Development)
+    puppeteerConfig = {
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+    };
+}
 
 console.log('Platform:', os.platform());
 console.log('Is Termux:', isTermux);
-if (isTermux) {
+console.log('Is Linux Server:', isLinuxServer);
+if (isTermux || isLinuxServer) {
     console.log('Chrome Path:', puppeteerConfig.executablePath);
 }
 
