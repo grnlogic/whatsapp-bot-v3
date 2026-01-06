@@ -53,8 +53,20 @@ const unbanCommand = require('../commands/unban');
 const banlistCommand = require('../commands/banlist');
 const banService = require('../services/banService');
 
+// Delete Management
+const deleteCommand = require('../commands/delete');
+
 // Developer Info
 const developerCommand = require('../commands/developer');
+
+// Terminal & System Commands (Owner Only)
+const { execCommand, isOwner } = require('../commands/exec');
+const { gitPullCommand, gitStatusCommand, gitLogCommand } = require('../commands/gitops');
+const { botStopCommand, botStartCommand, botStatusCommand } = require('../commands/botcontrol');
+const { restartCommand, pm2StatusCommand, pm2StopCommand, pm2StartCommand } = require('../commands/pm2control');
+
+// Bot State Service
+const botStateService = require('../services/botStateService');
 
 /**
  * Handler untuk memproses command dari pesan
@@ -95,6 +107,19 @@ async function commandHandler(client, message) {
             '⛔ Anda tidak bisa menggunakan bot.\n' +
             'Hubungi developer jika ini kesalahan.'
         );
+    }
+    
+    // Check if bot is in sleep mode (ignore commands from non-owners)
+    if (botStateService.isSleeping() && !isOwner(sender)) {
+        // Bot commands are still allowed for checking status
+        if (command !== 'bot') {
+            return message.reply(
+                '💤 *Bot is in Sleep Mode*\n\n' +
+                'Bot sedang dalam mode sleep dan tidak menerima command dari user biasa.\n\n' +
+                '👑 Hanya owner yang dapat menggunakan bot saat ini.\n' +
+                'Hubungi developer untuk informasi lebih lanjut.'
+            );
+        }
     }
     
     if (chat.isGroup) {
@@ -318,6 +343,116 @@ async function commandHandler(client, message) {
             await developerCommand(client, message, args);
             break;
         
+        // Terminal & System Commands (Owner Only)
+        case 'exec':
+        case 'execute':
+        case 'terminal':
+        case 'cmd':
+            await execCommand(client, message, args);
+            break;
+        
+        // Git Operations (Owner Only)
+        case 'git':
+            const gitSubCommand = args[0] ? args[0].toLowerCase() : '';
+            const gitArgs = args.slice(1);
+            
+            switch (gitSubCommand) {
+                case 'pull':
+                case 'update':
+                    await gitPullCommand(client, message, gitArgs);
+                    break;
+                case 'status':
+                case 'stat':
+                    await gitStatusCommand(client, message, gitArgs);
+                    break;
+                case 'log':
+                case 'history':
+                    await gitLogCommand(client, message, gitArgs);
+                    break;
+                default:
+                    await message.reply(
+                        '⚠️ *Git Command Usage:*\n\n' +
+                        '```!git pull``` - Smart pull (auto-handle conflicts)\n' +
+                        '```!git status``` - Check repository status\n' +
+                        '```!git log [count]``` - View commit history\n\n' +
+                        '🔒 Owner only commands'
+                    );
+            }
+            break;
+        
+        // Bot Control (Owner Only)
+        case 'bot':
+            const botSubCommand = args[0] ? args[0].toLowerCase() : '';
+            const botArgs = args.slice(1);
+            
+            switch (botSubCommand) {
+                case 'stop':
+                case 'sleep':
+                case 'pause':
+                    await botStopCommand(client, message);
+                    break;
+                case 'start':
+                case 'wake':
+                case 'resume':
+                    await botStartCommand(client, message);
+                    break;
+                case 'status':
+                case 'info':
+                case 'state':
+                    await botStatusCommand(client, message);
+                    break;
+                default:
+                    await message.reply(
+                        '⚠️ *Bot Control Usage:*\n\n' +
+                        '```!bot stop``` - Put bot in sleep mode\n' +
+                        '```!bot start``` - Wake up bot\n' +
+                        '```!bot status``` - Check bot status\n\n' +
+                        '🔒 Owner only commands'
+                    );
+            }
+            break;
+        
+        // PM2 Process Management (Owner Only)
+        case 'restart':
+        case 'reboot':
+            await restartCommand(client, message, args);
+            break;
+        
+        case 'pm2':
+            const pm2SubCommand = args[0] ? args[0].toLowerCase() : '';
+            const pm2Args = args.slice(1);
+            
+            switch (pm2SubCommand) {
+                case 'status':
+                case 'list':
+                case 'ls':
+                    await pm2StatusCommand(client, message, pm2Args);
+                    break;
+                case 'restart':
+                case 'reboot':
+                    await restartCommand(client, message, pm2Args);
+                    break;
+                case 'stop':
+                case 'kill':
+                    await pm2StopCommand(client, message, pm2Args);
+                    break;
+                case 'start':
+                case 'run':
+                    await pm2StartCommand(client, message, pm2Args);
+                    break;
+                default:
+                    await message.reply(
+                        '⚠️ *PM2 Command Usage:*\n\n' +
+                        '```!pm2 status``` - Check PM2 processes\n' +
+                        '```!pm2 restart [name]``` - Restart process\n' +
+                        '```!pm2 stop [name]``` - Stop process\n' +
+                        '```!pm2 start [name]``` - Start process\n' +
+                        '```!restart``` - Quick restart bot\n\n' +
+                        '🔒 Owner only commands'
+                    );
+            }
+            break;
+        
         case 'character':
         case 'char':
         case 'animechar':
@@ -407,6 +542,13 @@ async function commandHandler(client, message) {
         case 'listban':
         case 'bannedusers':
             await banlistCommand.execute(message, args);
+            break;
+        
+        // Delete Message (Admin/Developer Only)
+        case 'delete':
+        case 'del':
+        case 'hapus':
+            await deleteCommand.execute(message, args);
             break;
         
         default:

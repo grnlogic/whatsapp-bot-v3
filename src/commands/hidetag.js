@@ -1,3 +1,5 @@
+const { isOwner } = require('./exec');
+
 /**
  * Hide Tag Command
  * Mengirim pesan dengan mention semua member grup (hidden tag)
@@ -20,14 +22,17 @@ async function hidetagCommand(client, message, args) {
             return;
         }
         
-        // Cek apakah user adalah admin
-        const sender = message.author || message.from;
+        // Ambil sender ID - untuk GRUP pakai message.author, untuk PRIVATE pakai message.from
+        const sender = chat.isGroup ? message.author : message.from;
         
         // Normalisasi sender ID (handle @lid dan @c.us)
         const senderNumber = sender.split('@')[0]; // Ambil nomor saja
         
         console.log(`🔍 Debug Hidetag:`);
-        console.log(`   Sender: ${sender}`);
+        console.log(`   Is Group: ${chat.isGroup}`);
+        console.log(`   Sender (from): ${message.from}`);
+        console.log(`   Sender (author): ${message.author}`);
+        console.log(`   Final Sender: ${sender}`);
         console.log(`   Sender Number: ${senderNumber}`);
         console.log(`   Total participants: ${chat.participants.length}`);
         console.log(`   Participants IDs:`);
@@ -35,24 +40,47 @@ async function hidetagCommand(client, message, args) {
             console.log(`     ${i+1}. ${p.id._serialized} (Admin: ${p.isAdmin})`);
         });
         
-        // Cari participant berdasarkan nomor (bukan full ID)
-        const participant = chat.participants.find(p => {
-            const participantNumber = p.id._serialized.split('@')[0];
-            console.log(`   Comparing: ${participantNumber} === ${senderNumber}`);
-            return participantNumber === senderNumber;
-        });
+        // CHECK 1: Apakah user adalah OWNER? (bypass admin check)
+        const userIsOwner = isOwner(sender);
         
-        console.log(`   Participant found: ${participant ? 'Yes' : 'No'}`);
-        console.log(`   Is Admin: ${participant ? participant.isAdmin : 'N/A'}`);
-        
-        // TEMPORARY: Skip admin check jika participant tidak ditemukan
-        // (untuk testing, hapus nanti setelah fix)
-        if (!participant) {
-            console.log(`⚠️  WARNING: Participant not found, skipping admin check for testing`);
-            // Lanjutkan eksekusi tanpa cek admin
-        } else if (!participant.isAdmin) {
-            await message.reply('❌ Command ini hanya bisa digunakan oleh admin grup!');
-            return;
+        if (!userIsOwner) {
+            // CHECK 2: Apakah user adalah admin grup? (hanya cek jika bukan owner)
+            // Cari participant - coba match dengan berbagai cara
+            let participant = chat.participants.find(p => {
+                const pId = p.id._serialized;
+                const pNumber = pId.split('@')[0];
+                
+                // Match exact ID
+                if (pId === sender) return true;
+                
+                // Match by number only (ignore domain)
+                if (pNumber === senderNumber) return true;
+                
+                // Match jika sender pakai @lid tapi participant pakai @c.us
+                if (sender.includes('@lid') && pId.includes('@c.us')) {
+                    return pNumber === senderNumber;
+                }
+                
+                return false;
+            });
+            
+            console.log(`   Participant found: ${participant ? 'Yes' : 'No'}`);
+            console.log(`   Is Admin: ${participant ? participant.isAdmin : 'N/A'}`);
+            
+            // Cek apakah user adalah admin
+            if (!participant) {
+                await message.reply('❌ Gagal memverifikasi status admin. Coba lagi.');
+                return;
+            }
+            
+            if (!participant.isAdmin) {
+                await message.reply('❌ Command ini hanya bisa digunakan oleh admin grup!');
+                return;
+            }
+            
+            console.log(`   ✅ User is GROUP ADMIN`);
+        } else {
+            console.log(`   ✅ User is OWNER - bypassing admin check`);
         }
         
         let textToSend = '';
