@@ -17,7 +17,6 @@ const { playCommand, songCommand, ytsCommand } = require('../commands/youtube');
 const { altPlayCommand } = require('../commands/youtubeAlt');
 const { ultimateYouTubeDownload } = require('../services/ultimateYoutube');
 const { fileManagerCommand } = require('../commands/fileManager');
-const { geminiCommand, aiCommand } = require('../commands/gemini');
 
 // LoLHuman API Commands (Yang bekerja)
 const qrcodeCommand = require('../commands/qrcode');
@@ -113,12 +112,8 @@ async function commandHandler(client, message) {
     if (botStateService.isSleeping() && !isOwner(sender)) {
         // Bot commands are still allowed for checking status
         if (command !== 'bot') {
-            return message.reply(
-                '💤 *Bot is in Sleep Mode*\n\n' +
-                'Bot sedang dalam mode sleep dan tidak menerima command dari user biasa.\n\n' +
-                '👑 Hanya owner yang dapat menggunakan bot saat ini.\n' +
-                'Hubungi developer untuk informasi lebih lanjut.'
-            );
+            // Silent ignore - bot is sleeping (probably running locally for testing)
+            return;
         }
     }
     
@@ -254,19 +249,6 @@ async function commandHandler(client, message) {
         case 'fm':
         case 'files':
             await fileManagerCommand(client, message, args);
-            break;
-        
-        case 'nekobot':
-        case 'chat':
-        case 'ask':
-        case 'tanya':
-            await geminiCommand(client, message, args);
-            break;
-        
-        case 'ai':
-        case 'bot':
-        case 'assistant':
-            await aiCommand(client, message, args);
             break;
         
         // LoLHuman API - Working Commands
