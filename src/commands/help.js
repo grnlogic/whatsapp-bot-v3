@@ -9,9 +9,6 @@ const axios = require('axios');
  */
 async function helpCommand(client, message) {
     try {
-        // URL gambar tersembunyi - sama dengan menu
-        const imageUrl = 'https://i.pinimg.com/736x/62/71/21/627121c616927469a5afe87589f779bf.jpg';
-        
         const helpText = `
 ╔══════════════════════╗
 ║  📖 *HELP & GUIDE*  ║
@@ -133,24 +130,33 @@ A: \`!todo overdue\`
 ⚠️ *Beta - Dalam Pengembangan*
 `;
 
-        // Try to send with image first
+        // Try to send with bot's profile picture
         try {
-            console.log('📥 Downloading help image...');
-            const response = await axios.get(imageUrl, {
-                responseType: 'arraybuffer',
-                timeout: 10000,
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-                }
-            });
+            console.log('📸 Getting bot profile picture...');
             
-            const imageBuffer = Buffer.from(response.data, 'binary');
-            const base64Image = imageBuffer.toString('base64');
-            const media = new MessageMedia('image/jpeg', base64Image, 'help.jpg');
+            // Get bot's own profile picture
+            const botNumber = client.info.wid._serialized;
+            const profilePicUrl = await client.getProfilePicUrl(botNumber);
             
-            // Kirim gambar dengan caption (HANYA INI)
-            await message.reply(media, undefined, { caption: helpText });
-            console.log(`✅ Help dengan gambar berhasil ditampilkan untuk ${message.from}`);
+            if (profilePicUrl) {
+                const response = await axios.get(profilePicUrl, {
+                    responseType: 'arraybuffer',
+                    timeout: 10000,
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                    }
+                });
+                
+                const imageBuffer = Buffer.from(response.data, 'binary');
+                const base64Image = imageBuffer.toString('base64');
+                const media = new MessageMedia('image/jpeg', base64Image, 'profile.jpg');
+                
+                // Kirim gambar dengan caption
+                await message.reply(media, undefined, { caption: helpText });
+                console.log(`✅ Help dengan PP bot berhasil ditampilkan untuk ${message.from}`);
+            } else {
+                throw new Error('No profile picture found');
+            }
         } catch (imageError) {
             // Jika gagal download/kirim gambar, fallback ke text saja
             console.warn('⚠️ Gagal kirim dengan gambar, fallback ke text:', imageError.message);

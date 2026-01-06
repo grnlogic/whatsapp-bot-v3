@@ -14,9 +14,6 @@ async function menuCommand(client, message) {
         const sender = message.author || message.from;
         const isUserOwner = isOwner(sender);
         
-        // URL gambar tersembunyi - akan ditampilkan sebagai thumbnail menu
-        const imageUrl = 'https://i.pinimg.com/736x/62/71/21/627121c616927469a5afe87589f779bf.jpg';
-        
         // Menu untuk USER BIASA
         const userMenuText = `
 🤖 *WHATSAPP BOT v1.0*
@@ -254,28 +251,37 @@ Commands are executed with bot's permissions.
         // Pilih menu berdasarkan role
         const menuText = isUserOwner ? ownerMenuText : userMenuText;
 
-        // Try to send with image first
+        // Try to send with bot's profile picture
         try {
-            console.log('📥 Downloading menu image...');
-            const response = await axios.get(imageUrl, {
-                responseType: 'arraybuffer',
-                timeout: 10000,
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            console.log('📸 Getting bot profile picture...');
+            
+            // Get bot's own profile picture
+            const botNumber = client.info.wid._serialized;
+            const profilePicUrl = await client.getProfilePicUrl(botNumber);
+            
+            if (profilePicUrl) {
+                const response = await axios.get(profilePicUrl, {
+                    responseType: 'arraybuffer',
+                    timeout: 10000,
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                    }
+                });
+                
+                const imageBuffer = Buffer.from(response.data, 'binary');
+                const base64Image = imageBuffer.toString('base64');
+                const media = new MessageMedia('image/jpeg', base64Image, 'profile.jpg');
+                
+                // Kirim gambar dengan caption
+                await message.reply(media, undefined, { caption: menuText });
+                
+                if (isUserOwner) {
+                    console.log(`✅ Menu OWNER dengan PP bot berhasil ditampilkan untuk ${message.from}`);
+                } else {
+                    console.log(`✅ Menu USER dengan PP bot berhasil ditampilkan untuk ${message.from}`);
                 }
-            });
-            
-            const imageBuffer = Buffer.from(response.data, 'binary');
-            const base64Image = imageBuffer.toString('base64');
-            const media = new MessageMedia('image/jpeg', base64Image, 'menu.jpg');
-            
-            // Kirim gambar dengan caption (HANYA INI)
-            await message.reply(media, undefined, { caption: menuText });
-            
-            if (isUserOwner) {
-                console.log(`✅ Menu OWNER dengan gambar berhasil ditampilkan untuk ${message.from}`);
             } else {
-                console.log(`✅ Menu USER dengan gambar berhasil ditampilkan untuk ${message.from}`);
+                throw new Error('No profile picture found');
             }
         } catch (imageError) {
             // Jika gagal download/kirim gambar, fallback ke text saja
