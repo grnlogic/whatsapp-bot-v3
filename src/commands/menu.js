@@ -16,236 +16,286 @@ async function menuCommand(client, message) {
         
         // Menu untuk USER BIASA
         const userMenuText = `
+*╔═══「 USER INFORMATION 」*
+*║* Nama     : ${message._data.notifyName || 'User'}
+*║* Status   : Regular User
+*║* Access   : Public Commands
+*╚════════════════════*
+
 🤖 *WHATSAPP BOT v1.0*
-━━━━━━━━━━━━━━━━━━━━
 ⚠️ *Bot dalam tahap pengembangan*
-⚠️ *Beberapa fitur masih tidak bekerja sepenuhnya*
-━━━━━━━━━━━━━━━━━━━━
 
-*BASIC*
-\`!ping\` \`!uptime\` \`!info\` \`!help\` \`!myid\` \`!developer\`
+*╔═══「 BASIC COMMANDS 」*
+*║* ➸ !ping
+*║* ➸ !uptime
+*║* ➸ !info
+*║* ➸ !help
+*║* ➸ !myid
+*║* ➸ !developer
+*║*
+*╠═══「 UTILITY TOOLS 」*
+*║* ➸ !afk [alasan]
+*║* ➸ !afk off
+*║*
+*╠═══「 TODO & REMINDER 」*
+*║* ➸ !todo add [judul|tanggal|prioritas|desc]
+*║* ➸ !todo list
+*║* ➸ !todo done [id]
+*║* ➸ !todo delete [id]
+*║* ➸ !reminder
+*║*
+*╠═══「 FUN & ENTERTAINMENT 」*
+*║* ➸ !maki [nama]
+*║* ➸ !neko
+*║* ➸ !neko list
+*║* ➸ !quote
+*║* ➸ !quotesimage
+*║* ➸ !faktaunik
+*║* ➸ !bucin
+*║*
+*╠═══「 STICKER MAKER 」*
+*║* ➸ !sticker (reply gambar/video)
+*║* ➸ !sticker [text]
+*║*
+*╠═══「 DOWNLOAD CENTER 」*
+*║* ➸ !download [url]
+*║* ➸ !ytmp3 [url]
+*║* ➸ !facebook [url]
+*║* ➸ !instagram [url]
+*║* ➸ !tiktok [url]
+*║* ➸ !twitter [url]
+*║*
+*╠═══「 YOUTUBE TOOLS 」*
+*║* ➸ !play [nama lagu]
+*║* ➸ !song [url]
+*║* ➸ !yts [kata kunci]
+*║* ➸ !altplay [url]
+*║*
+*╠═══「 FILE MANAGER 」*
+*║* ➸ !filemgr status
+*║* ➸ !filemgr keep
+*║* ➸ !filemgr nokeep
+*║* ➸ !filemgr list
+*║*
+*╠═══「 ANIME & MANGA 」*
+*║* ➸ !animesearch [judul]
+*║* ➸ !animedetail [id]
+*║* ➸ !animequote
+*║* ➸ !randomanime
+*║* ➸ !character [nama]
+*║* ➸ !wait [url_gambar]
+*║*
+*╠═══「 LOLHUMAN API 」*
+*║* ➸ !qrcode [text]
+*║* ➸ !pinterest [query]
+*║* ➸ !pixiv [tag]
+*║* ➸ !wallpaper [keyword]
+*║* ➸ !texteffect [style] [text]
+*║* ➸ !stalkig [username]
+*║* ➸ !chord [judul]
+*║* ➸ !lyrics [judul]
+*║*
+*╠═══「 INFORMASI 」*
+*║* ➸ !jadwalsholat [kota]
+*║* ➸ !asmaulhusna [nomor]
+*║* ➸ !listsurah
+*║* ➸ !quran [surah]:[ayat]
+*║* ➸ !jadwaltv [channel]
+*║* ➸ !kbbi [kata]
+*║* ➸ !weather [kota]
+*║* ➸ !wikipedia [query]
+*║*
+*╠═══「 IMAGE TOOLS 」*
+*║* ➸ !avatar [text]
+*║* ➸ !logo [style] [text]
+*║* ➸ !meme
+*║* ➸ !shortlink [url]
+*║*
+*╠═══「 ADMIN GROUP 」*
+*║* ➸ !hidetag [pesan]
+*║* ➸ !delete (reply pesan bot)
+*║*
+*╠═══「 NSFW CONTENT 」* 🔞
+*║* ⚠️ *PERINGATAN: Konten Dewasa 18+*
+*║* ⚠️ *Wajib verifikasi oleh developer*
+*║*
+*║* 📝 *Cara Akses NSFW:*
+*║* 1️⃣ Daftar: !daftar [nama lengkap]
+*║* 2️⃣ Tunggu approval dari developer
+*║* 3️⃣ Akses semua fitur NSFW
+*║*
+*║* 🔞 *NSFW Commands:*
+*║* ➸ !nhsearch [keyword]
+*║* ➸ !nhentai [kode]
+*║* ➸ !danbooru [tag]
+*║* ➸ !nekopoi [url]
+*║*
+*╚═══▼△▼△▼△▼△▼*
 
-*UTILITY*
-\`!afk [alasan]\` - Set AFK
-\`!afk off\` - Nonaktifkan
-
-*TODO*
-\`!todo add [judul|tanggal|prioritas|desc]\`
-\`!todo list\` \`!todo done [id]\` \`!todo delete [id]\`
-\`!reminder\` - Cek reminder
-
-*FUN*
-\`!maki [nama]\` - Maki-maki
-\`!neko\` - Random neko
-\`!neko list\` - List kategori
-\`!quote\` - 💬 Random quote inspiratif
-\`!quotesimage\` - 🎨 Quote dalam bentuk image
-\`!faktaunik\` - 💡 Random fakta unik
-\`!bucin\` - 💕 Kata-kata bucin/romantis
-
-*ADMIN (GRUP)*
-\`!hidetag [pesan]\` - Tag all
-
-*STICKER*
-Kirim gambar/video + \`!sticker\`
-\`!sticker <text>\` - Text to sticker
-
-*DOWNLOAD*
-\`!download [url]\` - TikTok/IG/YT
-\`!ytmp3 [url]\` - YT to MP3
-
-*YOUTUBE* 🎵
-\`!play [nama lagu]\` - Cari & download
-\`!song [url]\` - Download dari link
-\`!yts [kata kunci]\` - Search YouTube
-\`!altplay [url]\` - Alternative downloader
-
-*FILE MANAGER* 📁
-\`!filemgr status\` - Cek mode penyimpanan
-\`!filemgr keep\` - Simpan file download
-\`!filemgr nokeep\` - Hapus otomatis (default)
-\`!filemgr list\` - Lihat file tersimpan
-
-*LOLHUMAN API* ✨
-\`!qrcode [text]\` - Generate QR Code
-\`!pinterest [query]\` - Cari gambar Pinterest
-\`!pixiv [tag]\` - 🎨 Cari gambar Pixiv (⚠️ bisa NSFW)
-\`!wallpaper [keyword]\` - 🖼️ Search wallpaper HD
-\`!texteffect [style] [text]\` - 🎨 Text to image effect
-\`!stalkig [username]\` - Stalk profil Instagram
-\`!quote\` - Random quote inspiratif
-\`!chord [judul]\` - Cari chord gitar
-\`!character [nama]\` - Cari anime character
-\`!wait [url_gambar]\` - Cari anime dari gambar
-\`!asmaulhusna [nomor]\` - 99 Nama Allah
-
-*NSFW CONTENT* 🔞
-⚠️ *PERINGATAN: Konten Dewasa 18+*
-⚠️ *Wajib verifikasi oleh developer*
-
-📝 *Cara Akses NSFW:*
-1. Daftar: \`!daftar [nama lengkap]\`
-2. Tunggu approval dari developer
-3. Setelah diapprove, akses semua fitur NSFW
-
-🔞 *NSFW Commands:*
-\`!nhsearch [keyword]\` - 🔎 Search nhentai doujin
-\`!nhentai [kode]\` - 💣 Info detail kode nuklir
-\`!danbooru [tag]\` - 🎨 Random anime image
-\`!nekopoi [url]\` - 🎬 Nekopoi downloader
-
-⚠️ *Disclaimer:*
-Bot tidak bertanggung jawab atas penyalahgunaan fitur NSFW.
-Pengguna wajib berusia 18+ dan bertanggung jawab penuh.
-
-━━━━━━━━━━━━━━━━━━━━
-💡 \`!help\` untuk detail lengkap
+💡 Gunakan !help untuk detail lengkap
 🙏 Terima kasih telah menggunakan bot
 `;
 
         // Menu untuk OWNER/DEVELOPER
         const ownerMenuText = `
+*╔═══「 USER INFORMATION 」*
+*║* Nama     : ${message._data.notifyName || 'Developer'}
+*║* Status   : 👑 *DEVELOPER*
+*║* Access   : Full Access + Admin Tools
+*╚════════════════════*
+
 🤖 *WHATSAPP BOT v1.0*
-━━━━━━━━━━━━━━━━━━━━
-👑 *DEVELOPER MODE*
-━━━━━━━━━━━━━━━━━━━━
+👑 *DEVELOPER MODE ACTIVE*
 
-*BASIC*
-\`!ping\` \`!uptime\` \`!info\` \`!help\` \`!myid\` \`!developer\`
-
-*UTILITY*
-\`!afk [alasan]\` - Set AFK
-\`!afk off\` - Nonaktifkan
-
-*TODO*
-\`!todo add [judul|tanggal|prioritas|desc]\`
-\`!todo list\` \`!todo done [id]\` \`!todo delete [id]\`
-\`!reminder\` - Cek reminder
-
-*FUN*
-\`!maki [nama]\` - Maki-maki
-\`!neko\` - Random neko
-\`!neko list\` - List kategori
-\`!quote\` - 💬 Random quote inspiratif
-\`!quotesimage\` - 🎨 Quote dalam bentuk image
-\`!faktaunik\` - 💡 Random fakta unik
-\`!bucin\` - 💕 Kata-kata bucin/romantis
-
-*ADMIN (GRUP)*
-\`!hidetag [pesan]\` - Tag all
-
-*STICKER*
-Kirim gambar/video + \`!sticker\`
-\`!sticker <text>\` - Text to sticker
-
-*DOWNLOAD*
-\`!download [url]\` - TikTok/IG/YT
-\`!ytmp3 [url]\` - YT to MP3
-
-*YOUTUBE* 🎵
-\`!play [nama lagu]\` - Cari & download
-\`!song [url]\` - Download dari link
-\`!yts [kata kunci]\` - Search YouTube
-\`!altplay [url]\` - Alternative downloader
-
-*FILE MANAGER* 📁
-\`!filemgr status\` - Cek mode penyimpanan
-\`!filemgr keep\` - Simpan file download
-\`!filemgr nokeep\` - Hapus otomatis (default)
-\`!filemgr list\` - Lihat file tersimpan
-
-*LOLHUMAN API* ✨
-\`!qrcode [text]\` - Generate QR Code
-\`!pinterest [query]\` - Cari gambar Pinterest
-\`!pixiv [tag]\` - 🎨 Cari gambar Pixiv (⚠️ bisa NSFW)
-\`!wallpaper [keyword]\` - 🖼️ Search wallpaper HD
-\`!texteffect [style] [text]\` - 🎨 Text to image effect
-\`!stalkig [username]\` - Stalk profil Instagram
-\`!quote\` - Random quote inspiratif
-\`!chord [judul]\` - Cari chord gitar
-\`!character [nama]\` - Cari anime character
-\`!wait [url_gambar]\` - Cari anime dari gambar
-\`!asmaulhusna [nomor]\` - 99 Nama Allah
-
-*NSFW CONTENT* 🔞
-\`!nhsearch [keyword]\` - Search nhentai doujin
-\`!nhentai [kode]\` - Info detail kode nuklir
-\`!danbooru [tag]\` - Random anime image
-\`!nekopoi [url]\` - Nekopoi downloader
-
-👤 *NSFW User Management:*
-\`!daftar [nama]\` - Registrasi akses NSFW
-\`!verify approve @user\` - Approve user
-\`!verify reject @user [reason]\` - Reject user
-\`!verify pending\` - Lihat pending list
-\`!verify remove @user\` - Hapus dari approved
-\`!nsfwlist stats\` - Statistik users
-\`!nsfwlist approved\` - List approved users
-\`!nsfwlist pending\` - List pending users
-\`!nsfwlist rejected\` - List rejected users
-
-━━━━━━━━━━━━━━━━━━━━
-
-*BAN MANAGEMENT* 🚫
-👨‍💼 *Developer Only - User Control*
-
-\`!ban @user [reason]\` - Ban user dari bot
-\`!ban <user_id> [reason]\` - Ban dengan ID
-\`!unban @user\` - Unban user
-\`!unban <user_id>\` - Unban dengan ID
-\`!banlist\` - Lihat semua banned users
-
-⚠️ User yang di-ban tidak bisa akses *SEMUA* fitur bot!
-
-━━━━━━━━━━━━━━━━━━━━
-
-*TERMINAL & SYSTEM CONTROL* 💻
-👑 *Owner Only - Advanced Features*
-
-*Terminal Execution:*
-\`!exec [command]\` - Execute terminal command
-\`!exec ls -la\` - List files
-\`!exec npm install\` - Install packages
-\`!exec pwd\` - Current directory
-
-*Git Operations:*
-\`!git pull\` - Smart pull (auto-handle conflicts)
-\`!git status\` - Check repository status
-\`!git log [count]\` - View commit history (default 5)
-
-*Bot Control:*
-\`!bot stop\` - Put bot in sleep mode
-\`!bot start\` - Wake up bot from sleep
-\`!bot status\` - Check bot status & uptime
-
-*Process Control:*
-\`!restart\` - Quick restart (auto-detect PM2/local)
-\`!pm2 status\` - Check all PM2 processes
-\`!pm2 restart [name]\` - Restart specific process
-\`!pm2 stop [name]\` - Stop process
-\`!pm2 start [name]\` - Start process
-
-*Local Development:*
-Run with: \`start.bat\` (Windows) or \`bash start.sh\` (Linux)
-This enables auto-restart on \`!restart\` command
-
-⚠️ *Sleep Mode:*
-• Bot akan ignore semua command dari user biasa
-• Hanya owner yang bisa menggunakan bot
-• Gunakan untuk maintenance atau update
+*╔═══「 BASIC COMMANDS 」*
+*║* ➸ !ping
+*║* ➸ !uptime
+*║* ➸ !info
+*║* ➸ !help
+*║* ➸ !myid
+*║* ➸ !developer
+*║*
+*╠═══「 UTILITY TOOLS 」*
+*║* ➸ !afk [alasan]
+*║* ➸ !afk off
+*║*
+*╠═══「 TODO & REMINDER 」*
+*║* ➸ !todo add [judul|tanggal|prioritas|desc]
+*║* ➸ !todo list
+*║* ➸ !todo done [id]
+*║* ➸ !todo delete [id]
+*║* ➸ !reminder
+*║*
+*╠═══「 FUN & ENTERTAINMENT 」*
+*║* ➸ !maki [nama]
+*║* ➸ !neko
+*║* ➸ !neko list
+*║* ➸ !quote
+*║* ➸ !quotesimage
+*║* ➸ !faktaunik
+*║* ➸ !bucin
+*║*
+*╠═══「 STICKER MAKER 」*
+*║* ➸ !sticker (reply gambar/video)
+*║* ➸ !sticker [text]
+*║*
+*╠═══「 DOWNLOAD CENTER 」*
+*║* ➸ !download [url]
+*║* ➸ !ytmp3 [url]
+*║* ➸ !facebook [url]
+*║* ➸ !instagram [url]
+*║* ➸ !tiktok [url]
+*║* ➸ !twitter [url]
+*║*
+*╠═══「 YOUTUBE TOOLS 」*
+*║* ➸ !play [nama lagu]
+*║* ➸ !song [url]
+*║* ➸ !yts [kata kunci]
+*║* ➸ !altplay [url]
+*║*
+*╠═══「 FILE MANAGER 」*
+*║* ➸ !filemgr status
+*║* ➸ !filemgr keep
+*║* ➸ !filemgr nokeep
+*║* ➸ !filemgr list
+*║*
+*╠═══「 ANIME & MANGA 」*
+*║* ➸ !animesearch [judul]
+*║* ➸ !animedetail [id]
+*║* ➸ !animequote
+*║* ➸ !randomanime
+*║* ➸ !character [nama]
+*║* ➸ !wait [url_gambar]
+*║*
+*╠═══「 LOLHUMAN API 」*
+*║* ➸ !qrcode [text]
+*║* ➸ !pinterest [query]
+*║* ➸ !pixiv [tag]
+*║* ➸ !wallpaper [keyword]
+*║* ➸ !texteffect [style] [text]
+*║* ➸ !stalkig [username]
+*║* ➸ !chord [judul]
+*║* ➸ !lyrics [judul]
+*║*
+*╠═══「 INFORMASI 」*
+*║* ➸ !jadwalsholat [kota]
+*║* ➸ !asmaulhusna [nomor]
+*║* ➸ !listsurah
+*║* ➸ !quran [surah]:[ayat]
+*║* ➸ !jadwaltv [channel]
+*║* ➸ !kbbi [kata]
+*║* ➸ !weather [kota]
+*║* ➸ !wikipedia [query]
+*║*
+*╠═══「 IMAGE TOOLS 」*
+*║* ➸ !avatar [text]
+*║* ➸ !logo [style] [text]
+*║* ➸ !meme
+*║* ➸ !shortlink [url]
+*║*
+*╠═══「 ADMIN GROUP 」*
+*║* ➸ !hidetag [pesan]
+*║* ➸ !delete (reply pesan bot)
+*║*
+*╠═══「 NSFW CONTENT 」* 🔞
+*║* ➸ !nhsearch [keyword]
+*║* ➸ !nhentai [kode]
+*║* ➸ !danbooru [tag]
+*║* ➸ !nekopoi [url]
+*║*
+*╠═══「 NSFW USER MANAGEMENT 」*
+*║* ➸ !daftar [nama]
+*║* ➸ !verify approve @user
+*║* ➸ !verify reject @user [reason]
+*║* ➸ !verify pending
+*║* ➸ !verify remove @user
+*║* ➸ !nsfwlist stats
+*║* ➸ !nsfwlist approved
+*║* ➸ !nsfwlist pending
+*║* ➸ !nsfwlist rejected
+*║*
+*╠═══「 BAN MANAGEMENT 」* 🚫
+*║* ➸ !ban @user [reason]
+*║* ➸ !ban <user_id> [reason]
+*║* ➸ !unban @user
+*║* ➸ !unban <user_id>
+*║* ➸ !banlist
+*║*
+*╠═══「 TERMINAL CONTROL 」* 💻
+*║* ➸ !exec [command]
+*║* ➸ !exec ls -la
+*║* ➸ !exec npm install
+*║* ➸ !exec pwd
+*║*
+*╠═══「 GIT OPERATIONS 」*
+*║* ➸ !git pull
+*║* ➸ !git status
+*║* ➸ !git log [count]
+*║*
+*╠═══「 BOT CONTROL 」*
+*║* ➸ !bot stop
+*║* ➸ !bot start
+*║* ➸ !bot status
+*║*
+*╠═══「 PROCESS CONTROL 」*
+*║* ➸ !restart
+*║* ➸ !pm2 status
+*║* ➸ !pm2 restart [name]
+*║* ➸ !pm2 stop [name]
+*║* ➸ !pm2 start [name]
+*║*
+*╚═══▼△▼△▼△▼△▼*
 
 💡 *Workflow Update & Restart:*
-1. \`!git pull\` - Pull latest code
-2. \`!exec npm install\` - Install dependencies
-3. \`!restart\` - Restart bot
+1️⃣ !git pull - Pull latest code
+2️⃣ !exec npm install - Install dependencies
+3️⃣ !restart - Restart bot
 
 ⚠️ *Warning:*
 Be careful with terminal commands!
 Commands are executed with bot's permissions.
 
-━━━━━━━━━━━━━━━━━━━━
-💡 \`!help\` untuk detail lengkap
-👑 Developer Mode Active
+👑 Full Developer Access Active
 `;
 
         // Pilih menu berdasarkan role
