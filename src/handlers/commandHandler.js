@@ -59,7 +59,7 @@ const deleteCommand = require('../commands/delete');
 const developerCommand = require('../commands/developer');
 
 // Terminal & System Commands (Owner Only)
-const { execCommand, isOwner } = require('../commands/exec');
+const { execCommand, execInCommand, isOwner } = require('../commands/exec');
 const { gitPullCommand, gitStatusCommand, gitLogCommand } = require('../commands/gitops');
 const { botStopCommand, botStartCommand, botStatusCommand } = require('../commands/botcontrol');
 const { restartCommand, pm2StatusCommand, pm2StopCommand, pm2StartCommand } = require('../commands/pm2control');
@@ -331,6 +331,12 @@ async function commandHandler(client, message) {
         case 'terminal':
         case 'cmd':
             await execCommand(client, message, args);
+            break;
+        
+        case 'execin':
+        case 'exin':
+        case 'cdin':
+            await execInCommand(client, message, args);
             break;
         
         // Git Operations (Owner Only)

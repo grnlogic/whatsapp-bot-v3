@@ -263,9 +263,9 @@ async function menuCommand(client, message) {
 *║*
 *╠═══「 TERMINAL CONTROL 」* 💻
 *║* ➸ !exec [command]
-*║* ➸ !exec ls -la
-*║* ➸ !exec npm install
-*║* ➸ !exec pwd
+*║* ➸ !execin [folder] [command]
+*║* ➸ !execin ~ ls -la
+*║* ➸ !execin home pwd
 *║*
 *╠═══「 GIT OPERATIONS 」*
 *║* ➸ !git pull

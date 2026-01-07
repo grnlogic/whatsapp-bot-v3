@@ -163,4 +163,154 @@ async function execCommand(client, message, args) {
     }
 }
 
-module.exports = { execCommand, isOwner };
+/**
+ * Execute Command in Specific Directory
+ * Usage: !execin <folder> <command>
+ * Usage: !execin ~ <command> (untuk home directory)
+ * Usage: !execin home <command> (untuk home directory)
+ * 
+ * Examples:
+ * !execin web-wisata-pangandaran git status
+ * !execin web-wisata-pangandaran npm install
+ * !execin ~ ls -la
+ * !execin home pwd
+ */
+async function execInCommand(client, message, args) {
+    const sender = message.author || message.from;
+    
+    // Check if user is owner
+    if (!isOwner(sender)) {
+        return message.reply('🚫 *Access Denied*\n\nCommand ini hanya untuk developer/owner.');
+    }
+    
+    // Check if folder and command provided
+    if (args.length < 2) {
+        return message.reply(
+            '⚠️ *Usage:* !execin <folder> <command>\n\n' +
+            '*Examples:*\n' +
+            '```!execin web-wisata-pangandaran git status```\n' +
+            '```!execin web-wisata-pangandaran npm install```\n' +
+            '```!execin ~ ls -la```\n' +
+            '```!execin home pwd```\n\n' +
+            '💡 *Tips:*\n' +
+            '• Gunakan `~` atau `home` untuk home directory\n' +
+            '• Folder relatif dari home directory (~/folder)\n' +
+            '• Gunakan `..` untuk parent directory'
+        );
+    }
+    
+    const folderArg = args[0];
+    const command = args.slice(1).join(' ');
+    
+    // Determine target directory
+    let targetDir;
+    const os = require('os');
+    const path = require('path');
+    
+    if (folderArg === '~' || folderArg === 'home') {
+        // Home directory
+        targetDir = os.homedir();
+    } else if (folderArg.startsWith('~/')) {
+        // Relative to home
+        targetDir = path.join(os.homedir(), folderArg.substring(2));
+    } else if (folderArg.startsWith('/')) {
+        // Absolute path
+        targetDir = folderArg;
+    } else {
+        // Relative to home directory (default)
+        targetDir = path.join(os.homedir(), folderArg);
+    }
+    
+    try {
+        // Check if directory exists
+        const fs = require('fs');
+        if (!fs.existsSync(targetDir)) {
+            return message.reply(
+                `❌ *Directory Not Found*\n\n` +
+                `*Target:* \`${targetDir}\`\n\n` +
+                `Directory tidak ditemukan. Cek path-nya lagi.`
+            );
+        }
+        
+        await message.reply(
+            `🔄 *Executing Command...*\n\n` +
+            `*Directory:* \`${targetDir}\`\n` +
+            `*Command:* \`${command}\`\n\n` +
+            `⏳ Please wait...`
+        );
+        
+        // Execute command in target directory
+        const { stdout, stderr } = await execAsync(command, {
+            timeout: 30000,
+            maxBuffer: 1024 * 1024 * 10, // 10MB buffer
+            cwd: targetDir // Execute in target directory
+        });
+        
+        // Combine stdout and stderr
+        let output = '';
+        if (stdout) output += stdout;
+        if (stderr) output += `\n━━━ STDERR ━━━\n${stderr}`;
+        
+        // If no output
+        if (!output.trim()) {
+            output = '✅ Command executed successfully (no output)';
+        }
+        
+        // Log to console
+        console.log(`✅ ExecIn command by ${sender} in ${targetDir}:`, command);
+        console.log('Output:', output.substring(0, 200) + (output.length > 200 ? '...' : ''));
+        
+        // Split output if too long
+        const chunks = splitMessage(output);
+        
+        // Send first chunk with header
+        await message.reply(
+            `✅ *Command Executed*\n\n` +
+            `*Directory:* \`${targetDir}\`\n` +
+            `*Command:* \`${command}\`\n\n` +
+            `*Output:*\n\`\`\`\n${chunks[0]}\`\`\``
+        );
+        
+        // Send remaining chunks
+        for (let i = 1; i < chunks.length; i++) {
+            await message.reply(`\`\`\`\n${chunks[i]}\`\`\``);
+        }
+        
+    } catch (error) {
+        console.error('❌ ExecIn command error:', error);
+        
+        let errorMessage = '❌ *Command Failed*\n\n';
+        errorMessage += `*Directory:* \`${targetDir}\`\n`;
+        errorMessage += `*Command:* \`${command}\`\n\n`;
+        
+        if (error.killed) {
+            errorMessage += '⏱️ *Error:* Command timeout (exceeded 30 seconds)';
+        } else if (error.code) {
+            errorMessage += `*Exit Code:* ${error.code}\n\n`;
+            
+            if (error.stderr) {
+                const stderrChunks = splitMessage(error.stderr);
+                errorMessage += `*Error Output:*\n\`\`\`\n${stderrChunks[0]}\`\`\``;
+                
+                // Send main error
+                await message.reply(errorMessage);
+                
+                // Send remaining error chunks
+                for (let i = 1; i < stderrChunks.length; i++) {
+                    await message.reply(`\`\`\`\n${stderrChunks[i]}\`\`\``);
+                }
+                return;
+            }
+            
+            if (error.stdout) {
+                errorMessage += `*Output:*\n\`\`\`\n${error.stdout}\`\`\``;
+            }
+        } else {
+            errorMessage += `*Error:* ${error.message}`;
+        }
+        
+        await message.reply(errorMessage);
+    }
+}
+
+module.exports = { execCommand, execInCommand, isOwner };
